@@ -105,11 +105,15 @@
       <div id="task-view" class="modal slide-in-up" ng-controller="TaskCtrl">
         <header class="bar bar-header bar-secondary">
           <h1 class="title">New Task</h1>
-          <button class="button button-clear button-primary" ng-click="close()">Done</button>
         </header>
         <ion-content class="padding has-header">
           <input type="text" placeholder="I need to do this...">
+		  
         </ion-content>
+        <div class="bar bar-footer">
+			<button class="button" ng-click="close()">Cancel</button>	
+			<button class="button" ng-click="close()">Post to Forum</button>		
+		  </div>
       </div>
     </script>
 
