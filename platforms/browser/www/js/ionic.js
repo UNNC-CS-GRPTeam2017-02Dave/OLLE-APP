@@ -79,34 +79,11 @@
 
 
       .controller('HomeCtrl', function($scope, $timeout, $ionicModal, $ionicActionSheet) {
-        $scope.items = [];
+      
 
         $ionicModal.fromTemplateUrl('newTask.html', function(modal) {
           $scope.settingsModal = modal;
-        });
-
-        var removeItem = function(item, button) {
-          $ionicActionSheet.show({
-            buttons: [],
-            destructiveText: 'Delete Task',
-            cancelText: 'Cancel',
-            cancel: function() {
-              return true;
-            },
-            destructiveButtonClicked: function() {
-              $scope.items.splice($scope.items.indexOf(item), 1);
-              return true;
-            }
-          });
-        };
-
-        var completeItem = function(item, button) {
-          item.isCompleted = true;
-        };
-
-        $scope.onReorder = function(el, start, end) {
-          ionic.Utils.arrayMove($scope.items, start, end);
-        };
+        });      
 
         $scope.onRefresh = function() {
           console.log('ON REFRESH');
@@ -117,32 +94,28 @@
         }
 
 
-        $scope.removeItem = function(item) {
-          removeItem(item);
-        };
-
+        
         $scope.newTask = function() {
           $scope.settingsModal.show();
         };
 
-        // Create the items
-        for(var i = 3; i > 0; i--) {
-          $scope.items.push({
-            title: 'Task ' + i,
-            buttons: [{
-              text: 'Done',
-              type: 'button-success',
-              onButtonClicked: completeItem,
-            }, {
-              text: 'Delete',
-              type: 'button-danger',
-              onButtonClicked: removeItem,
-            }]
-          });
-        }
-
+        $scope.weeks = [
+        	{value: 3, id: 3},
+        	{value: 2, id: 2},
+        	{value: 1, id: 1}
+      	];
       })
+      .controller('ChatRoomsCtrl', function($scope){
 
+      	$scope.chatrooms = [
+        	{ title: 'English', id: 1 },
+        	{ title: 'Japanese', id: 2 },
+        	{ title: 'Spanish', id: 3 },
+        	{ title: 'Korean', id: 4 },
+        	{ title: 'Chinese', id: 5 },
+        	{ title: 'French', id: 6 }
+      	];
+      })
       .controller('TaskCtrl', function($scope) {
         $scope.close = function() {
           $scope.modal.hide();
