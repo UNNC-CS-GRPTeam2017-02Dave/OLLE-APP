@@ -120,4 +120,22 @@
         $scope.close = function() {
           $scope.modal.hide();
         }
+      })
+      .controller('AlertCtrl', function($scope, $ionicPopup){
+      		$scope.showConfirm = function() {
+             var confirmPopup = $ionicPopup.confirm({
+               title: 'Consume Ice Cream',
+               template: 'Are you sure you want to log out?'
+             });
+             confirmPopup.then(function(res) {
+               if(res) {
+                 console.log('You are sure');
+               } else {
+                 console.log('You are not sure');
+               }
+             });
+           };
+
+
+
       });
