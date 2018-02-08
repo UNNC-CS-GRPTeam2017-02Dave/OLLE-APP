@@ -92,14 +92,14 @@
             $scope.$broadcast('scroll.refreshComplete');
           }, 1000);
         }
-
-
         
         $scope.newTask = function() {
           $scope.settingsModal.show();
         };
 
         $scope.weeks = [
+        	{value: 5, id: 5},
+        	{value: 4, id: 4},
         	{value: 3, id: 3},
         	{value: 2, id: 2},
         	{value: 1, id: 1}
@@ -121,21 +121,26 @@
           $scope.modal.hide();
         }
       })
+      .controller('calenderCtrl', function ($scope, CalenderService) {
+
+
+    	
+    	
+  		})
+
+	
       .controller('AlertCtrl', function($scope, $ionicPopup){
       		$scope.showConfirm = function() {
              var confirmPopup = $ionicPopup.confirm({
-               title: 'Consume Ice Cream',
+               title: 'Log out',
                template: 'Are you sure you want to log out?'
              });
              confirmPopup.then(function(res) {
                if(res) {
-                 console.log('You are sure');
+                 window.location.href='index.html';
                } else {
                  console.log('You are not sure');
                }
              });
            };
-
-
-
       });
