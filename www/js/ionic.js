@@ -92,11 +92,7 @@
             $scope.$broadcast('scroll.refreshComplete');
           }, 1000);
         }
-        
-        $scope.newTask = function() {
-          $scope.settingsModal.show();
-        };
-
+    
         $scope.weeks = [
         	{value: 5, id: 5},
         	{value: 4, id: 4},
@@ -104,7 +100,17 @@
         	{value: 2, id: 2},
         	{value: 1, id: 1}
       	];
+
+        $scope.newTask = function() {
+          $scope.settingsModal.show();
+        };
+
+     
+        $scope.onItemDelete = function(week) {
+	    	$scope.weeks.splice($scope.weeks.indexOf(week), 1);
+	  	};       
       })
+      
       .controller('ChatRoomsCtrl', function($scope){
 
       	$scope.chatrooms = [
@@ -121,13 +127,7 @@
           $scope.modal.hide();
         }
       })
-      .controller('calenderCtrl', function ($scope, CalenderService) {
-
-
-    	
-    	
-  		})
-
+      
 	
       .controller('AlertCtrl', function($scope, $ionicPopup){
       		$scope.showConfirm = function() {
