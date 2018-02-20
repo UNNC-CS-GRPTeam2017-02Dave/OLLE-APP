@@ -23,16 +23,25 @@
         <ion-side-menu-content drag-content="true" edge-drag-threshold=50>  
             <ion-header-bar class="bar-positive">  
                 <a menu-toggle="left" class="button icon ion-navicon"></a>  
-                <h1 class="title">Forum</h1>  
+                <h1 class="title">Forum</h1>      
             </ion-header-bar>  
             <ion-content has-tabs="true" on-refresh="onRefresh()">
             	<ion-refresher></ion-refresher>
          		<ion-list scroll="false" on-refresh="onRefresh()"
-                    s-editing="isEditingItems" 
-                    animation="fade-out">
+                    	  s-editing="isEditingItems" animation="fade-out"
+                    	  show-delete="data.showDelete">
             		<ion-item ng-repeat="week in weeks" 
-                              href="#/week/{{week.id}}">
-          		        Week {{ week.value }}		
+                              href="#/week/{{week.id}}" class="item-remove-animate">
+          		        Week {{ week.value }}
+          		        <ion-option-button class="button-assertive" 
+                             			ng-click="onItemDelete(week)">
+                            Delete
+          				</ion-option-button>	
+          		        <ion-option-button class="button-calm"
+                             ng-click="edit(week)">
+            				Edit
+          				</ion-option-button>
+          		        
             		</ion-item>
           		</ion-list>
         	</ion-content>            
@@ -62,7 +71,7 @@
 
       <ion-tab title="Calendar" icon-on="icon ion-ios-calendar" 
       							icon-off="icon ion-ios-calendar-outline"
-      							ng-controller="calenderCtrl">
+      							>
       	<ion-header-bar class=" bar-positive">  
           <h1 class="title">Calendar</h1>
         </ion-header-bar>
