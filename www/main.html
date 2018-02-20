@@ -6,45 +6,63 @@
     <link href="https://cdn.bootcss.com/ionic/1.3.2/css/ionic.css" rel="stylesheet">
     <link href="css/list.css" rel="stylesheet">
     <script src="https://cdn.bootcss.com/ionic/1.3.2/js/ionic.bundle.min.js"></script>
-	<script src="js/ionic.js"></script>
-
+    <script src="js/ionic.js"> </script>
     
   </head>
-  <body ng-controller="RootCtrl">
-    
-    <ion-tabs class="tabs-icon-top tabs-positive">
 
-      <ion-tab title="Forum" 
-               icon-on="ion-ios-book" 
-               icon-off="ion-ios-book-outline" 
-               ng-controller="HomeCtrl">
-     
-        <ion-side-menus>  
-        <ion-side-menu-content drag-content="true" edge-drag-threshold=50>  
-            <ion-header-bar class="bar-positive">  
-                <a menu-toggle="left" class="button icon ion-navicon"></a>  
-                <h1 class="title">Forum</h1>  
-        		<button class="button button-icon icon ion-ios-minus-outline"
-          					ng-click="data.showDelete = !data.showDelete; data.showReorder = false"> 
-				</button>
-      
-            </ion-header-bar>  
-            <ion-content has-tabs="true" on-refresh="onRefresh()">
-            	<ion-refresher></ion-refresher>
-         		<ion-list scroll="false" on-refresh="onRefresh()"
-                    	  s-editing="isEditingItems" animation="fade-out"
-                    	  show-delete="data.showDelete">
-            		<ion-item ng-repeat="week in weeks" 
-                              href="#/week/{{week.id}}" class="item-remove-animate">
-          		        Week {{ week.value }}	
-          		        <ion-delete-button class="ion-minus-circled" 
-                             			ng-click="onItemDelete(week)">
-          				</ion-delete-button>	
-            		</ion-item>
-          		</ion-list>
-        	</ion-content>            
-        </ion-side-menu-content>  
-        <ion-side-menu side="left">            
+  <body ng-app="ionicApp">
+    
+    <ion-nav-bar class="bar-positive">
+      <ion-nav-back-button>
+      </ion-nav-back-button>
+    </ion-nav-bar>
+             
+    <ion-nav-view></ion-nav-view>
+
+
+    <script id="templates/tabs.html" type="text/ng-template">
+      <ion-tabs class="tabs-icon-top tabs-positive">
+
+        <ion-tab title="Forum" icon-on="ion-ios-book" 
+               				   icon-off="ion-ios-book-outline" 
+               				   href="#/tab/forum"
+               				   >
+          <ion-nav-view name="forum-tab"></ion-nav-view>
+        </ion-tab>
+
+        <ion-tab title="Calendar" icon-on="icon ion-ios-calendar" 
+      							  icon-off="icon ion-ios-calendar-outline" 
+      							  href="#/tab/calendar">
+          <ion-nav-view name="calendar-tab"></ion-nav-view>
+        </ion-tab>
+
+        <ion-tab title="Chats" icon-on="icon ion-ios-chatbubble" 
+      						   icon-off="icon ion-ios-chatbubble-outline" 
+      						   href="#/tab/chats">
+          <ion-nav-view name="chats-tab"></ion-nav-view>
+        </ion-tab>
+
+        <ion-tab title="Me" icon-on="icon ion-ios-person" 
+        					icon-off="icon ion-ios-person-outline"
+      						href="#/tab/me">
+          <ion-nav-view name="me-tab"></ion-nav-view>
+        </ion-tab>
+
+      </ion-tabs>
+    </script>
+
+    <script id="templates/sideNav.html" type="text/ng-template">
+       
+    <ion-side-menus>
+
+      <ion-pane ion-side-menu-content>
+        <ion-nav-bar class="bar-positive nav-title-slide-ios7">
+          <ion-nav-back-button class="button-clear"><i class="icon ion-chevron-left"></i> </ion-nav-back-button>
+        </ion-nav-bar>
+        <ion-nav-view name="sideNav" animation="slide-left-right"></ion-nav-view>
+      </ion-pane>
+
+      <ion-side-menu side="left">            
             <ion-header-bar class="bar-stable">
           		<h1 class="title">Navigation bar</h1>
         	</ion-header-bar>
@@ -63,42 +81,68 @@
           		</ion-list>       	
             </ion-content>  
         </ion-side-menu>  
-        </ion-side-menus>  
+    </ion-side-menus>
+      
+    </script>
 
-      </ion-tab>
+    <script id="templates/forum.html" type="text/ng-template">
+      <ion-view view-title="Forum">                   
+        <ion-nav-buttons side="left">
+        	<button menu-toggle="left" class="button button-icon icon ion-navicon"></button>
+      	</ion-nav-buttons>               
+        <ion-content has-tabs="true" >
+            <ion-refresher></ion-refresher>
+         		<ion-list scroll="false" 
+                    	  >
+            		<ion-item ng-repeat="week in weeks" 
+                              href="#/week/{{week.id}}" class="item-remove-animate">
+          		        Week {{ week.value }} 
+          		        <ion-option-button class="button-assertive" 
+                             			ng-click="onItemDelete(week)">
+                            Delete
+          				</ion-option-button>	
+          		        <ion-option-button class="button-calm"
+                             ng-click="edit(week)">
+            				Edit
+          				</ion-option-button>        		        
+            		</ion-item>
+          		</ion-list>
+        </ion-content>                     
+      </ion-view>         
+    </script>
 
-      <ion-tab title="Calendar" icon-on="icon ion-ios-calendar" 
-      							icon-off="icon ion-ios-calendar-outline"
-      							>
-      	<ion-header-bar class=" bar-positive">  
-          <h1 class="title">Calendar</h1>
-        </ion-header-bar>
-        <ion-content has-header="true">
-          
+    
+    <script id="templates/calendar.html" type="text/ng-template">
+      <ion-view view-title="Calendar">
+        <ion-content class="padding">
+          <h3>Create hybrid mobile apps with the web technologies you love.</h3>
+          <p>Free and open source, Ionic offers a library of mobile-optimized HTML, CSS and JS components for building highly interactive apps.</p>
+          <p>Built with Sass and optimized for AngularJS.</p>
+          <p>
+            <a class="button icon icon-right ion-chevron-right" href="#/tab/navstack">Tabs Nav Stack</a>
+          </p>
         </ion-content>
-      </ion-tab>
+      </ion-view>
+    </script>
 
-      <ion-tab title="Chats" icon-on="icon ion-ios-chatbubble" 
-      						 icon-off="icon ion-ios-chatbubble-outline" 
-      						 ng-controller="ChatRoomsCtrl">              
-        <ion-header-bar class="bar-positive">            
-            <h1 class="title">Chats</h1>          	
-        </ion-header-bar>
-    	<ion-content >
+   
+
+    <script id="templates/chats.html" type="text/ng-template">
+      <ion-view title="Chats">
+        <ion-content >
     		<ion-list>
         		<ion-item ng-repeat="chatroom in chatrooms" href="#/chatroom/{{chatroom.id}}" >
             		<i class="icon ion-chatbubble-working"></i>  {{chatroom.title}} 
             	</ion-item>
          	 </ion-list>
-        </ion-content>           
-      </ion-tab>
-	 
-	  <ion-tab title="Me" icon-on="icon ion-ios-person" icon-off="icon ion-ios-person-outline">
-        <ion-header-bar class=" bar-positive">  
-          <h1 class="title">Me</h1>
-        </ion-header-bar>
+        </ion-content>       
+      </ion-view>
+    </script>
+
+   	<script id="templates/me.html" type="text/ng-template">
+      <ion-view view-title="Me">
         <ion-content>
-      		<ion-list>
+        <ion-list>
 
         		<ion-item class="item-thumbnail-right" href="#">
           			<img src="http://www.runoob.com/try/demo_source/venkman.jpg">
@@ -139,11 +183,11 @@
 						   ng-controller="AlertCtrl"
 						   ng-click="showConfirm()">
 						Log out
-			</button>         		
+			</button>
+          
         </ion-content>
-      </ion-tab>
-	  
-    </ion-tabs>
+      </ion-view>
+    </script> 
 
     <script id="newTask.html" type="text/ng-template">
       <div id="task-view" class="modal slide-in-up" ng-controller="TaskCtrl">

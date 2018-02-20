@@ -1,4 +1,18 @@
-/*	angular.module('ionicApp', ['ionic'])
+angular.module('ionicApp', ['ionic'])
+
+    .run(function($ionicPlatform) {
+      $ionicPlatform.ready(function() {
+        // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
+        // for form inputs)
+        if(window.cordova && window.cordova.plugins.Keyboard) {
+          cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
+        }
+        if(window.StatusBar) {
+          // org.apache.cordova.statusbar required
+          StatusBar.styleDefault();
+        }
+      });
+    })
 
     .config(function($stateProvider, $urlRouterProvider) {
 
@@ -8,77 +22,65 @@
           abstract: true,
           templateUrl: "templates/tabs.html"
         })
-        .state('tabs.home', {
-          url: "/home",
-          views: {
-            'home-tab': {
-              templateUrl: "templates/home.html",
-              controller: 'HomeTabCtrl'
-            }
-          }
-        })
-        .state('tabs.facts', {
-          url: "/facts",
-          views: {
-            'home-tab': {
-              templateUrl: "templates/facts.html"
-            }
-          }
-        })
-        .state('tabs.facts2', {
-          url: "/facts2",
-          views: {
-            'home-tab': {
-              templateUrl: "templates/facts2.html"
-            }
-          }
-        })
-        .state('tabs.about', {
-          url: "/about",
-          views: {
-            'about-tab': {
-              templateUrl: "templates/about.html"
-            }
-          }
-        })
-        .state('tabs.navstack', {
-          url: "/navstack",
-          views: {
-            'about-tab': {
-              templateUrl: "templates/nav-stack.html"
-            }
-          }
-        })
-        .state('tabs.contact', {
-          url: "/contact",
-          views: {
-            'contact-tab': {
-              templateUrl: "templates/contact.html"
-            }
-          }
-        });
 
+        
 
-       $urlRouterProvider.otherwise("/tab/home");
+        .state('tabs.forum', {
+        	
+          
+          views: {
+            'forum-tab': {
+              templateUrl: "templates/sideNav.html",
+              controller: 'HomeCtrl'
+            }
+          },
+          url: "/forum",
+          abstract: true    
+        })
 
+         .state('tabs.forum.tasks', {
+          url: "/tasks",
+          views: {
+            'sideNav': {
+              templateUrl: "templates/forum.html",
+              controller: 'HomeCtrl'
+            }
+          }
+        })
+               
+        .state('tabs.calendar', {
+          url: "/calendar",
+          views: {
+            'calendar-tab': {
+              templateUrl: "templates/calendar.html"
+            }
+          }
+        })
+        
+        .state('tabs.chats', {
+          url: "/chats",
+          views: {
+            'chats-tab': {
+              templateUrl: "templates/chats.html",
+              controller: 'ChatRoomsCtrl' 
+            }
+          }
+        })
+
+        .state('tabs.me', {
+          url: "/me",
+          views: {
+            'me-tab': {
+              templateUrl: "templates/me.html"
+            }
+          }
+        })
+
+      // if none of the above states are matched, use this as the fallback
+      $urlRouterProvider.otherwise('/tab/forum/tasks');
     })
 
-    .controller('HomeTabCtrl', function($scope) {
-      console.log('HomeTabCtrl');
-    });
-	
-*/
-	  angular.module('ionicApp', ['ionic'])
-
-      .controller('RootCtrl', function($scope) {
-        $scope.onControllerChanged = function(oldController, oldIndex, newController, newIndex) {
-          console.log('Controller changed', oldController, oldIndex, newController, newIndex);
-          console.log(arguments);
-        };
-      })
-
-
-      .controller('HomeCtrl', function($scope, $timeout, $ionicModal, $ionicActionSheet) {
+    .controller('HomeCtrl', function($scope, $timeout, $ionicModal, $ionicActionSheet) {
       
 
         $ionicModal.fromTemplateUrl('newTask.html', function(modal) {
@@ -102,16 +104,25 @@
       	];
 
         $scope.newTask = function() {
-          $scope.settingsModal.show();
+          	$scope.settingsModal.show();
         };
-
-     
+  
         $scope.onItemDelete = function(week) {
 	    	$scope.weeks.splice($scope.weeks.indexOf(week), 1);
-	  	};       
+	  	};
+
+	  	$scope.edit = function(week) {
+	    	alert('Edit week: ' + week.id);
+	  	};
+
+     })
+     .controller('TaskCtrl', function($scope) {
+        $scope.close = function() {
+          $scope.modal.hide();
+        }
       })
-      
-      .controller('ChatRoomsCtrl', function($scope){
+
+     .controller('ChatRoomsCtrl', function($scope){
 
       	$scope.chatrooms = [
         	{ title: 'English', id: 1 },
@@ -127,8 +138,7 @@
           $scope.modal.hide();
         }
       })
-      
-	
+
       .controller('AlertCtrl', function($scope, $ionicPopup){
       		$scope.showConfirm = function() {
              var confirmPopup = $ionicPopup.confirm({
