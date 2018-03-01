@@ -9,7 +9,9 @@ import { AuthServiceProvider } from '../../providers/auth-service/auth-service';
 })
 export class RegisterPage {
   responseData : any;
+  verificationResponse: any;
   userData = {"name":"", "surname":"", "username":"", "email":"","password":""};
+  verifyCode = {"valCode":"", "email":"", "name":""};
 
   constructor(public navCtrl: NavController, public authService: AuthServiceProvider, public toastCtrl: ToastController, public alertCtrl: AlertController) {
   }
@@ -26,12 +28,14 @@ export class RegisterPage {
       // Process user input, pass it to the API ("signup")
       this.authService.postData(this.userData, "signup").then((result) => {
         this.responseData = result;
-        console.log(this.responseData );   // see what is coming from the api
+        console.log( this.responseData );   // see what is coming from the api
         // checks if user already exists
-        if( this.responseData.userData ){
-          localStorage.setItem('userData', JSON.stringify(this.responseData)  )
+        if( this.responseData.emailSent ){
+            // Habria que quitar user input al registrarse.
+          this.showPrompt("Email verification", "Registration completed. Check your email to validate your account!");
+          //localStorage.setItem('userData', JSON.stringify(this.responseData)  )
           //switch page
-          this.navCtrl.push(TabsPage);
+          //this.navCtrl.push(TabsPage);
         }
         // Not a nottingham email
         else if ( this.responseData.error1 )
@@ -51,7 +55,7 @@ export class RegisterPage {
         }
       }, (err) => {
         //DB Connection failed message
-        this.showAlert();
+        this.showAlert("Fatal Error!", "Contact system administrators!");
       });
     }
     else{
@@ -60,18 +64,89 @@ export class RegisterPage {
     }
   }
 
-  presentToast(string) {
+  // Invalid User Input
+  presentToast(message) {
     let toast = this.toastCtrl.create({
-      message: string,
+      message: message,
       duration: 3000
     });
     toast.present();
   }
 
-  showAlert() {
+  // Code verification
+  showPrompt(message1, message2) {
+    let prompt = this.alertCtrl.create({
+      title: message1,
+      message: message2,
+      inputs: [
+        {
+          name: 'valCode',
+          placeholder: 'Validation Code',
+          type: 'password'
+        },
+      ],
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          handler: data => {
+            console.log('Cancel clicked');
+          }
+        },
+        {
+          // Should have time-stamp here.
+          text: 'Resend',
+          handler: data => {
+            console.log('Resend clicked');
+
+            this.authService.postData(this.userData.email, "generateNewValidationCode").then((res) => {
+
+                // email sent
+                /*if( res.emailSent ) {
+                    console.log("Email sent.")
+                }
+                // failure to send email
+                else {
+                    console.log("Email not sent.")
+                }*/
+            })
+          }
+        },
+        {
+          text: 'Submit',
+          handler: data => {
+            console.log('Submit clicked');
+            this.verifyCode.valCode = data.valCode;
+            this.verifyCode.email = this.userData.email;
+            console.log( this.verifyCode.valCode );
+            // Process user validation code input, pass it to the API ("signup")
+            this.authService.postData(this.verifyCode, "verifyAccount").then((res) => {
+                this.verificationResponse = res;
+
+                // User successfuly validated
+                if( this.verificationResponse.success ) {
+                    localStorage.setItem('userData', JSON.stringify(this.responseData) );
+                    //switch page (check alert extended documentation to be sure)
+                    this.navCtrl.push(TabsPage);
+                }
+                else {
+                    // Code does not match.
+                    this.presentToast("Invalid Code. Try again.")
+                }
+            });
+
+          }
+        }
+      ]
+    });
+    prompt.present();
+  }
+
+  // Unable to connect to DB
+  showAlert(message1, message2) {
     let alert = this.alertCtrl.create({
-      title: 'Fatal Error!',
-      subTitle: 'Contact system administrators!',
+      title: message1,
+      subTitle: message2,
       buttons: ['OK']
     });
     alert.present();

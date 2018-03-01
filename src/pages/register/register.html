@@ -10,11 +10,11 @@
 <ion-content>
   <!-- ngModel, whatever typed is stored in userData, used in register.ts -->
   <ion-item>
-    <ion-input type="text" placeholder="First Name" clearInput [(ngModel)]="userData.name"></ion-input>
+    <ion-input type="text" placeholder="First Name" pattern="[a-zA-Z]+" clearInput [(ngModel)]="userData.name"></ion-input>
   </ion-item>
 
   <ion-item>
-    <ion-input type="text" placeholder="Last Name" clearInput [(ngModel)]="userData.surname"></ion-input>
+    <ion-input type="text" placeholder="Last Name" pattern="[a-zA-Z]+" clearInput [(ngModel)]="userData.surname"></ion-input>
   </ion-item>
 
   <ion-item>
