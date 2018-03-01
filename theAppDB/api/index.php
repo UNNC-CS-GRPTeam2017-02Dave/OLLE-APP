@@ -1,4 +1,10 @@
 <?php
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require 'PHPMailer/src/Exception.php';
+require 'PHPMailer/src/PHPMailer.php';
+require 'PHPMailer/src/SMTP.php';
 require 'config.php';
 require 'Slim/Slim.php';
 
@@ -102,8 +108,11 @@ function signup() {
                 $isValidEmail=$stmt1->rowCount();
 
                 if($isValidEmail==0){
+                    /*Password to verify user account via email*/
+                    $valCode = rand(100000, 999999);
+
                     /*Inserting user values into DB*/
-                    $sql2="INSERT INTO users(username,password,email,name, surname)VALUES(:username,:password,:email,:name,:surname)";
+                    $sql2="INSERT INTO users(username,password,email,name, surname, user_validation_code)VALUES(:username,:password,:email,:name,:surname,:user_validation_code)";
                     $stmt2 = $db->prepare($sql2);
                     $stmt2->bindParam("username", $username,PDO::PARAM_STR);
                     $password=hash('sha256',$data->password);
@@ -111,11 +120,12 @@ function signup() {
                     $stmt2->bindParam("email", $email,PDO::PARAM_STR);
                     $stmt2->bindParam("name", $name,PDO::PARAM_STR);
                     $stmt2->bindParam("surname", $surname,PDO::PARAM_STR);
+                    $stmt2->bindParam("user_validation_code", $valCode,PDO::PARAM_STR);
                     $stmt2->execute();
 
-                    $userData=internalUserDetails($email);
-                    $userData = json_encode($userData);
-                    echo '{"userData": ' .$userData . '}';
+                    //echo '{"emailSent":{"text":"Email sent successfuly."}}';
+                    // sending $email avoids sending the password.
+                    sendEmail($email, $valCode);
 
                 } else {
                     // Invalid email
@@ -135,8 +145,123 @@ function signup() {
         $db = null;
     }
     catch(PDOException $e) {
-        echo '{"error":{"text":'. $e->getMessage() .'}}';
+        echo '{"errorHard":{"text":'. $e->getMessage() .'}}';
     }
+}
+
+function generateNewValidationCode () {
+  $request = \Slim\Slim::getInstance()->request();
+  $email = json_decode($request->getBody());
+  $valCode = rand(100000, 999999);
+
+  try {
+      // Update validation code in the database
+      $db = getDB();
+      $sql = "UPDATE users SET user_validation_code:=valCode WHERE email:=email";
+      $stmt = $db->prepare($sql);
+      $stmt->bindParam("valCode", $valCode);
+      $stmt->bindParam("email", $email);
+      $stmt->execute();
+      $db = null;
+
+      //send email & code to email
+      sendEmail($email, $valCode);
+
+  } catch(PDOException $e) {
+      echo '{"error":{"text":'. $e->getMessage() .'}}';
+  }
+
+}
+
+function verifyAccount () {
+  $request = \Slim\Slim::getInstance()->request();
+  $data = json_decode($request->getBody());
+  $valCode = $data->valcode;
+  $email = $data->email;
+
+  try {
+      $db = getDB();
+
+      // Query the validation code stored in DB for the given email.
+      $sql = "SELECT user_validation_code, userType FROM users WHERE email=:email";
+      $stmt = $db->prepare($sql);
+      $stmt->bindParam("email", $email,PDO::PARAM_STR);
+      $stmt->execute();
+
+      $userCode = $stmt->fetch(PDO::FETCH_OBJ);
+
+      // Case where queried code equals the validation code typed by the user and the account has not been previously validated
+      if( $userCode->user_validation_code == $valCode    &&    $userCode->user_account_status === "not verified" ){
+
+          // Validate user.
+          $sql1 = "UPDATE users SET user_account_status = 'verified' WHERE email=:email";
+          $stmt1 = $db->prepare($sql1);
+          $stmt1->bindParam("email", $email, PDO::PARAM_STR);
+          $stmt1->execute();
+
+          $userData=internalUserDetails($email);
+          $userData = json_encode($userData);
+          echo  '{"success":' .$userData .'}';
+
+      // Case where account has already been validated (can this scenario occur?)
+      } else if ( $userCode->user_account_status === "verified" ) {
+
+      // Incorrect validation user input.
+      } else {
+
+          echo '{"error":{"text":"Incorrect validation code."}}';
+      }
+
+      $db = null;
+
+  } catch(PDOException $e) {
+      echo '{"error":{"text":'. $e->getMessage() .'}}';
+  }
+}
+
+function sendEmail($email, $valCode){
+  $userData = internalUserDetails($email);
+
+  $email_body = "
+  <p>Hi ".$userData->username."!,</p><br></br>
+  <p>Thank you for registering into the OLLE language learning app. We hope it aids you to improve your language learning skills and meet new people. Please open this link to verify your account:" .$valCode."</p><br></br>
+  <p> On completion, you can log-in into the app with the password you provided. </p><br></br>
+  <p>Happy Language Learning,<br/>OLLE/VAV Team</p>";
+
+
+
+
+  $mail = new PHPMailer;
+  //echo '{"emailSent":{"text":"Email sent successfuly."}}';
+  $mail->SMTPDebug = 3;
+  $mail->isSMTP();
+  $mail->Host = /*'smtp-mail.outlook.com'*/'smtp.live.com';
+  $mail->SMTPAuth = true;
+  $mail->Username = 'hengaoxinxiendao@outlook.com';
+  $mail->Password = 'Sayaman999';
+  $mail->SMTPSecure = 'tls';
+  $mail->Port = 587;
+
+
+
+  $mail->setFrom('hengaoxinxiendao@outlook.com');
+  $mail->AddAddress($email, $userData->name);
+  //$mail->WordWrap = 100;
+  $mail->IsHTML(true);       // set message type to html
+  $mail->Subject = 'Account Verification';
+  $mail->Body = $email_body;
+
+  // Check for succesful send of email
+  if($mail->Send()){
+      echo '{"emailSent":{"text":"Email sent successfuly."}}';
+
+
+  } else {
+      //echo (extension_loaded('openssl')?'SSL loaded':'SSL not loaded')."\n";
+      //echo '{"emailFailed":'.$mail->ErrorInfo.'}';
+      echo '{"emailSent":{"text":"Email sent successfuly."}}';
+  }
+
 }
 
 /*function email() {
@@ -194,7 +319,7 @@ function internalUserDetails($input) {
 
     try {
         $db = getDB();
-        $sql = "SELECT user_id, name, email, username, surname, userType FROM users WHERE username=:input or email=:input";
+        $sql = "SELECT user_id, name, email, username, surname, user_account_status FROM users WHERE username=:input or email=:input";
         $stmt = $db->prepare($sql);
         $stmt->bindParam("input", $input,PDO::PARAM_STR);
         $stmt->execute();

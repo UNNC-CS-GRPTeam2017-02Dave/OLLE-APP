@@ -6,7 +6,7 @@ session_start();
 define('DB_SERVER', 'localhost');
 define('DB_USERNAME', 'root');
 define('DB_PASSWORD', '');
-define('DB_DATABASE', 'social_language_learning_app');
+define('DB_DATABASE', 'slla');
 define("BASE_URL", "http://localhost/theAppDB/api/");
 define("SITE_KEY", 'yourSecretKey');
 
