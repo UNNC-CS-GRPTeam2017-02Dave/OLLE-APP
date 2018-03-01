@@ -1,4 +1,30 @@
-# Database mysql code
+# PHP-Slim-Restful
+```
+CREATE TABLE users(
+user_id int AUTO_INCREMENT PRIMARY KEY,
+username varchar(50),
+password varchar(300),
+name varchar(200),
+email varchar(300),
+user_account_status varchar(300),
+user_validation_code int);
 
-CREATE TABLE `slla`. ( `user_id` INT NOT NULL AUTO_INCREMENT , `name` VARCHAR(50) NULL DEFAULT NULL , `surname` VARCHAR(50) NULL DEFAULT NULL , `username` VARCHAR(50) NULL DEFAULT NULL , `email` VARCHAR(150) NULL DEFAULT NULL , `password` VARCHAR(150) NULL DEFAULT NULL , `user_account_status` ENUM('master','admin','validated','not validated') NOT NULL DEFAULT 'not validated' , `user_validation_code` INT NOT NULL , PRIMARY KEY (`user_id`)) ENGINE = MyISAM;
+CREATE TABLE feed(
+feed_id int PRIMARY KEY AUTO_INCREMENT,
+feed text,
+user_id_fk int,
+created int
+);
 
+CREATE TABLE `emailUsers` (
+  `user_id` int(11) PRIMARY KEY AUTO_INCREMENT,
+  `email` varchar(300) DEFAULT NULL,
+  `name` varchar(100) DEFAULT NULL
+)
+
+CREATE TABLE `imagesData` (
+  `img_id` int(11) PRIMARY KEY AUTO_INCREMENT,
+  `b64` text DEFAULT NULL,
+  `user_id_fk` int(11) DEFAULT NULL
+)
+```

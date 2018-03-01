@@ -13,6 +13,7 @@ $app = new \Slim\Slim();
 
 $app->post('/login','login'); /* User login */
 $app->post('/signup','signup'); /* User Signup  */
+$app->post('/verifyAccount', 'verifyAccount');
 //$app->get('/getFeed','getFeed'); /* User Feeds  */
 //$app->post('/feed','feed'); /* User Feeds  */
 //$app->post('/feedUpdate','feedUpdate'); /* User Feeds  */
@@ -62,7 +63,7 @@ function login() {
     }
 }
 
-
+/* I should check what variables are necessary and which others can be gotten rid off.*/
 /************************* USER REGISTRATION *************************************/
 function signup() {
     $request = \Slim\Slim::getInstance()->request();
@@ -176,14 +177,14 @@ function generateNewValidationCode () {
 function verifyAccount () {
   $request = \Slim\Slim::getInstance()->request();
   $data = json_decode($request->getBody());
-  $valCode = $data->valcode;
+  $valCode = $data->valCode;
   $email = $data->email;
 
   try {
       $db = getDB();
 
       // Query the validation code stored in DB for the given email.
-      $sql = "SELECT user_validation_code, userType FROM users WHERE email=:email";
+      $sql = "SELECT user_validation_code, user_account_status FROM users WHERE email=:email";
       $stmt = $db->prepare($sql);
       $stmt->bindParam("email", $email,PDO::PARAM_STR);
       $stmt->execute();
@@ -191,10 +192,10 @@ function verifyAccount () {
       $userCode = $stmt->fetch(PDO::FETCH_OBJ);
 
       // Case where queried code equals the validation code typed by the user and the account has not been previously validated
-      if( $userCode->user_validation_code == $valCode    &&    $userCode->user_account_status === "not verified" ){
-
+      if( $userCode->user_validation_code == $valCode    &&    $userCode->user_account_status === "not validated" ){
+          //echo '{"wtf":{"text":"Happy days."}}';
           // Validate user.
-          $sql1 = "UPDATE users SET user_account_status = 'verified' WHERE email=:email";
+          $sql1 = "UPDATE users SET user_account_status = 'validated' WHERE email=:email";
           $stmt1 = $db->prepare($sql1);
           $stmt1->bindParam("email", $email, PDO::PARAM_STR);
           $stmt1->execute();
@@ -204,7 +205,7 @@ function verifyAccount () {
           echo  '{"success":' .$userData .'}';
 
       // Case where account has already been validated (can this scenario occur?)
-      } else if ( $userCode->user_account_status === "verified" ) {
+    } else if ( $userCode->user_account_status === "validated" ) {
 
       // Incorrect validation user input.
       } else {
@@ -224,16 +225,15 @@ function sendEmail($email, $valCode){
 
   $email_body = "
   <p>Hi ".$userData->username."!,</p><br></br>
-  <p>Thank you for registering into the OLLE language learning app. We hope it aids you to improve your language learning skills and meet new people. Please open this link to verify your account:" .$valCode."</p><br></br>
+  <p>Thank you for registering into the OLLE language learning app. We hope it aids you to improve your language learning skills and meet new people. Please open this link to verify your account: " .$valCode."</p><br></br>
   <p> On completion, you can log-in into the app with the password you provided. </p><br></br>
   <p>Happy Language Learning,<br/>OLLE/VAV Team</p>";
 
 
-
-
+// add comments from PHPMailer
   $mail = new PHPMailer;
   //echo '{"emailSent":{"text":"Email sent successfuly."}}';
-  $mail->SMTPDebug = 3;
+  $mail->SMTPDebug = 0;
   $mail->isSMTP();
   $mail->Host = /*'smtp-mail.outlook.com'*/'smtp.live.com';
   $mail->SMTPAuth = true;
@@ -258,8 +258,8 @@ function sendEmail($email, $valCode){
 
   } else {
       //echo (extension_loaded('openssl')?'SSL loaded':'SSL not loaded')."\n";
-      //echo '{"emailFailed":'.$mail->ErrorInfo.'}';
-      echo '{"emailSent":{"text":"Email sent successfuly."}}';
+      echo '{"emailFailed":'.$mail->ErrorInfo.'}';
+      //echo '{"emailSent":{"text":"Email sent successfuly."}}';
   }
 
 }
