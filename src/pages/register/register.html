@@ -1,0 +1,34 @@
+<ion-header>
+
+  <ion-navbar>
+    <ion-title>Register</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content>
+  <!-- ngModel, whatever typed is stored in userData, used in register.ts -->
+  <ion-item>
+    <ion-input type="text" placeholder="First Name" clearInput [(ngModel)]="userData.name"></ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-input type="text" placeholder="Last Name" clearInput [(ngModel)]="userData.surname"></ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-input type="text" placeholder="Username" clearInput [(ngModel)]="userData.username"></ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-input type="email" placeholder="Email" clearInput [(ngModel)]="userData.email"></ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-input type="password" placeholder="Password" clearInput [(ngModel)]="userData.password"></ion-input>
+  </ion-item>
+
+  <button ion-button round block color="danger" (click)="signup()">Sign up</button>
+
+</ion-content>
