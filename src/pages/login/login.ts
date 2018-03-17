@@ -16,6 +16,10 @@ export class LoginPage {
   constructor(public navCtrl: NavController, public authService: AuthServiceProvider, public toastCtrl: ToastController, public alertCtrl: AlertController){
 
     // Open TabsPage if a user is already signed-in
+    //localStorage.clear();
+    //networkinterface.getIPAddress(function (ip) {
+    /*alert(ip);
+  });*/
     console.log(localStorage.getItem('userData'));
     if(localStorage.getItem('userData')){
       this.navCtrl.push(TabsPage);

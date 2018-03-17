@@ -11,4 +11,8 @@ export class CalendarPage {
 
   }
 
+  ionViewDidLoad() {
+    console.log('ionViewDidLoad Calendar');
+  }
+
 }
