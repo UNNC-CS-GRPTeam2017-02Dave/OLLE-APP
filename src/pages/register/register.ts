@@ -36,11 +36,11 @@ export class RegisterPage {
             this.responseData = result;
             console.log( this.responseData );   // see what is coming from the api
             // checks if user already exists
-            if( this.responseData.dataStored ){
+            if( this.responseData.userData ){
 
                 // Habria que quitar user input al registrarse.
-              console.log(this.responseData.dataStored.user_id);
-              this.userData.user_id = this.responseData.dataStored.user_id;
+              console.log(this.responseData.userData.user_id);
+              this.userData.user_id = this.responseData.userData.user_id;
               this.showPrompt("Email verification", "Registration completed. Check your email to validate your account!");
               //localStorage.setItem('userData', JSON.stringify(this.responseData)  )
               //switch page
