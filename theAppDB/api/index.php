@@ -162,7 +162,7 @@ function signup() {
                             $data->valCode = $oldData->user_validation_code;
                             updateUserData($db, $data);
                             $userData = json_encode($data);
-                            echo  '{"dataStored":' .$userData .'}';
+                            echo  '{"userData":' .$userData .'}';
                         }
 
                     // using username from already registered user.
@@ -191,7 +191,7 @@ function signup() {
                     $data->valCode = $oldData->user_validation_code;
                     updateUserData($db, $data);
                     $userData = json_encode($data);
-                    echo  '{"dataStored":' .$userData .'}';
+                    echo  '{"userData":' .$userData .'}';
                 }
             }
 
@@ -289,7 +289,7 @@ function sendEmail($email, $valCode){
 
   // add comments from PHPMailer
   $mail = new PHPMailer;
-  //echo '{"dataStored":{"text":"Email sent successfuly."}}';
+  //echo '{"userData":{"text":"Email sent successfuly."}}';
   $mail->SMTPDebug = 0;
   $mail->isSMTP();
   $mail->Host = /*'smtp-mail.outlook.com'*/'smtp.live.com';
@@ -312,7 +312,7 @@ function sendEmail($email, $valCode){
   if($mail->Send()){
       //echo '{"emailSent":{"text":"Email sent successfuly."}}';
       $userData = json_encode($userData);
-      echo  '{"dataStored":' .$userData .'}';
+      echo  '{"userData":' .$userData .'}';
 
   } else {
       //echo (extension_loaded('openssl')?'SSL loaded':'SSL not loaded')."\n";
