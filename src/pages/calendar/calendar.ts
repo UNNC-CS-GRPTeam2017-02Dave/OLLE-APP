@@ -7,8 +7,19 @@ import { NavController } from 'ionic-angular';
 })
 export class CalendarPage {
 
-  constructor(public navCtrl: NavController) {
+  drawerOptions: any;
 
+  constructor(public navCtrl: NavController) {
+    this.drawerOptions = {
+        handleHeight: 50,
+        thresholdFromBottom: 100,
+        thresholdFromTop: 100,
+        bounceBack: true
+    };
+  }
+
+  ionViewDidLoad() {
+    console.log('ionViewDidLoad Calendar');
   }
 
 }

@@ -6,6 +6,13 @@
   </ion-navbar>
 </ion-header>
 
-<ion-content padding>
+<ion-content>
+  <ion-list>
+    <button ion-item *ngFor="let item of items" (click)="itemSelected(item)">
+      <ion-icon name="chatboxes" item-start></ion-icon>
+      {{ item.language }}
+      <!--<ion-icon name="flag"></ion-icon>-->
+    </button>
+  </ion-list>
 
 </ion-content>

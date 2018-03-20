@@ -8,7 +8,6 @@ import { NavController } from 'ionic-angular';
 export class ForumPage {
 
   constructor(public navCtrl: NavController) {
-    
   }
 
 }
