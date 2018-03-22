@@ -11,7 +11,7 @@ export class ContentDrawer {
   // input component: enables to supply options to the component from wherever we are using it.
   @Input('options') options: any;
 
-  handleHeight: number = 50;
+  handleHeight: number = 0;
   bounceBack: boolean = true;
   thresholdTop: number = 200;
   thresholdBottom: number = 200;
@@ -51,11 +51,13 @@ export class ContentDrawer {
 
 
     // this.platform.height() == sizeOf(screen)
-    // Sets position of the scrollable button
+    /* Sets starting position of the scrollable component*/
     this.renderer.setElementStyle(this.element.nativeElement, 'bottom', this.platform.height() - this.handleHeight - this.topContent + 'px');
 
+    this.renderer.setElementStyle(this.element.nativeElement, 'height', this.platform.height() - this.bottomContent - this.topContent + 'px');
+
     /* Sets starting position of the touchable button within the scrollable screen*/
-    this.renderer.setElementStyle(this.element.nativeElement, 'padding-bottom', this.handleHeight + 'px');
+    //this.renderer.setElementStyle(this.element.nativeElement, 'padding-bottom', this.handleHeight + 'px');
 
     let hammer = new window['Hammer'](this.element.nativeElement);
     hammer.get('pan').set({ direction: window['Hammer'].DIRECTION_VERTICAL });
@@ -86,7 +88,7 @@ export class ContentDrawer {
     }
 
     if((newTop < this.thresholdTop && ev.additionalEvent === "panup") || bounceToTop){
-      console.log('Hello World!');
+      //console.log('Hello World!');
       this.domCtrl.write(() => {
         this.renderer.setElementStyle(this.element.nativeElement, 'transition', 'bottom 0.5s');
         /* Final position of bottom pixels of the screen when panned-up */
@@ -94,7 +96,7 @@ export class ContentDrawer {
       });
 
     } else if(((this.platform.height() - newTop) < this.thresholdBottom && ev.additionalEvent === "pandown") || bounceToBottom){
-      console.log('See ya');
+      //console.log('See ya');
       this.domCtrl.write(() => {
         this.renderer.setElementStyle(this.element.nativeElement, 'transition', 'bottom 0.5s');
         /* Final position of bottom pixels of the screen when panned-down */
