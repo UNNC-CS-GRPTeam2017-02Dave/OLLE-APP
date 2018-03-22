@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, ElementRef } from '@angular/core';
 import { NavController, NavParams, Content } from 'ionic-angular';
 import { AuthServiceProvider } from '../../providers/auth-service/auth-service';
 
@@ -8,6 +8,8 @@ import { AuthServiceProvider } from '../../providers/auth-service/auth-service';
 })
 export class InstantMessagingPage {
   @ViewChild(Content) content: Content;
+  @ViewChild('head') head: any;
+  @ViewChild('footer') footer: any;
 
   item: any;
   messages: any[];
@@ -20,10 +22,10 @@ export class InstantMessagingPage {
   postUserMessage    = {"chat_id":"", "user_id":"", "message":"" };
   supp: any;
   drawerOptions: any;
-  dimension: any;
+  displayOnLoad: boolean = false;
 
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public authService: AuthServiceProvider) {
+  constructor(public navCtrl: NavController, public navParams: NavParams, public authService: AuthServiceProvider, public elRef:ElementRef) {
       const data = JSON.parse(localStorage.getItem('userData'));
 
       this.item = navParams.get('item');
@@ -34,21 +36,33 @@ export class InstantMessagingPage {
       this.postOldMessageData.chat_id = this.item.chat_id;
       this.supp = data.userData.username;
 
-      let dimensions = this.content.getContentDimensions();
-      /*let dimensions = this.content.getContentDimensions();*/
-      // Generate sliding Component
-      this.drawerOptions = {
-          handleHeight: 50,
-          thresholdFromBottom: 100,
-          thresholdFromTop: 100,
-          bounceBack: true,
-          topContent: 112,/*dimensions.contentTop,*/
-          bottomContent: 112/*dimensions.contentBottom*/
-      };
-
       this.getFirstBatchMessages();
       this.getNewMessages();
       //this.getNewMessages();
+  }
+
+
+  /* Executed after the constructor / compiling the html code. */
+  ngAfterViewInit(){
+    let yAxisHeader: number = this.head.nativeElement.clientHeight;
+    let yAxisFooter: number = this.footer.nativeElement.clientHeight;
+    console.log(yAxisHeader);
+    console.log(yAxisFooter);
+
+    /* Generate sliding Component */
+    // It is generated after loading the screen (executing the constructor) because height of the header can be obtained ONCE it has been generated. Lifecycle.
+    this.drawerOptions = {
+        handleHeight: 56,
+        thresholdFromBottom: 100,
+        thresholdFromTop: 100,
+        bounceBack: true,
+        // sizeOfHeader & sizeOfFooter
+        topContent: yAxisHeader,
+        bottomContent: 2*yAxisFooter
+    };
+
+    // load the drawer.
+    this.displayOnLoad = true;
   }
 
   getFirstBatchMessages() {
@@ -67,7 +81,7 @@ export class InstantMessagingPage {
             // Get most recent message Details
             this.postNewMessageData.message_id = this.messages[this.messages.length-1].message_id;
             this.postNewMessageData.time = this.messages[this.messages.length-1].time_sent;
-            console.log(this.postOldMessageData);
+            //console.log(this.postOldMessageData);
         }
 
         // scroll to bottom message. Timeout required, otherwise messages are not processed appropriately , resulting in 'scrollHeight == contentHeight', see word document and do drawing.
@@ -99,7 +113,7 @@ export class InstantMessagingPage {
             // get new messageID and time_sent
             this.postNewMessageData.message_id = this.messages[this.messages.length-1].message_id;
             this.postNewMessageData.time = this.messages[this.messages.length-1].time_sent;
-            console.log(this.messages);
+            //console.log(this.messages);
 
             // go to bottom message
             this.scrollToBottom();

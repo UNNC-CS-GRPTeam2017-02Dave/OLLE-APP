@@ -1,16 +1,19 @@
-<ion-header>
+<ion-header #head>
   <ion-navbar>
     <ion-title>{{item.language}}</ion-title>
   </ion-navbar>
-
-  <ion-toolbar>
-    <ion-title>{{item.topic}}</ion-title>
-  </ion-toolbar>
 </ion-header>
 
-<content-drawer [options]="drawerOptions">
-  <div class="content">{{item.description}}</div>
-</content-drawer>
+<div *ngIf="displayOnLoad">
+  <content-drawer class="drawer"[options]="drawerOptions">
+    <div class="content">{{item.description}}</div>
+    <ion-footer>
+      <div class="drawerFooter">
+        <div class="drawerFooterText">{{item.topic}}</div>
+      </div>
+    </ion-footer>
+  </content-drawer>
+</div>
 
 <ion-content>
   <div id="chatMessages">
@@ -30,7 +33,7 @@
 
 
 
-<ion-footer>
+<ion-footer #footer>
   <ion-toolbar>
     <div id="footer">
       <div class="elem">
