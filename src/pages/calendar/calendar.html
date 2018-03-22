@@ -1,4 +1,4 @@
-<ion-header>
+<ion-header #head>
   <ion-navbar>
     <ion-title>
       Calendar
@@ -6,12 +6,17 @@
   </ion-navbar>
 </ion-header>
 
-<ion-content>
-  <ion-list>
-    <ion-list-header>Follow us on Twitter</ion-list-header>
-    <ion-item>
-      <ion-icon name="ionic" item-start></ion-icon>
-      @ionicframework
-    </ion-item>
-  </ion-list>
+<ion-content class="test">
+  <div class="test1">Hello World</div>
 </ion-content>
+
+<div *ngIf="displayNow">
+  <content-drawer [options]="drawerOptions">
+    <div class="content">Hello World!</div>
+    <ion-footer class="footer">
+      <div class="drawerFooter">
+        <div class="drawerFooterText">Food</div>
+      </div>
+    </ion-footer>
+  </content-drawer>
+</div>

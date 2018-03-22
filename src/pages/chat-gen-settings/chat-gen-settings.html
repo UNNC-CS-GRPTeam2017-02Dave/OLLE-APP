@@ -1,0 +1,26 @@
+
+<ion-header>
+
+  <ion-navbar>
+    <ion-title>General {{item.language}} Chat Settings</ion-title>
+  </ion-navbar>
+  <div class="elem">
+    <button ion-button (click)="modify()">Save</button>
+  </div>
+</ion-header>
+
+
+<ion-content>
+  <ion-item>
+    <ion-label color="primary" floating>Topic</ion-label>
+    <ion-input>{{item.topic}}</ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-label color="primary" floating>Description</ion-label>
+    <ion-input ion-textarea>{{item.description}}</ion-input>
+  </ion-item>
+
+  <button ion-button round block color="danger" (click)="deleteMessages()">Delete Messages</button>
+
+</ion-content>

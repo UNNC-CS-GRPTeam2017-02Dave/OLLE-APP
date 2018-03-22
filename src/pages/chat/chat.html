@@ -7,12 +7,28 @@
 </ion-header>
 
 <ion-content>
-  <ion-list>
-    <button ion-item *ngFor="let item of items" (click)="itemSelected(item)">
-      <ion-icon name="chatboxes" item-start></ion-icon>
-      {{ item.language }}
-      <!--<ion-icon name="flag"></ion-icon>-->
-    </button>
-  </ion-list>
+  <div *ngIf="isAdmin; else elseBlock">
+    <ion-list>
+      <button ion-item *ngFor="let item of items" (click)="itemSelected(item)">
+        <ion-icon name="chatboxes" item-start></ion-icon>
+        {{ item.language }}
+        <!--<ion-icon name="flag"></ion-icon>-->
+        <div>
+          <button ion-button color="primary" (click)="edit()">Edit</button>
+          <button ion-button color="primary" (click)="delete()">Delete</button>
+        </div>
+
+      </button>
+    </ion-list>
+  </div>
+  <ng-template #elseBlock>
+    <ion-list>
+      <button ion-item *ngFor="let item of items" (click)="itemSelected(item)">
+        <ion-icon name="chatboxes" item-start></ion-icon>
+        {{ item.language }}
+        <!--<ion-icon name="flag"></ion-icon>-->
+      </button>
+    </ion-list>
+  </ng-template>
 
 </ion-content>
