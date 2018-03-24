@@ -1,7 +1,7 @@
 <ion-header>
   <ion-navbar>
     <ion-title>MyOLLE</ion-title>
-
+    
     <!--Logout Button -->
     <ion-buttons end>
       <button ion-button icon-start (click)="logout()">
@@ -15,34 +15,5 @@
 
 
 <ion-content>
-  <ion-list>
-
-      <div id="block">
-        <div class="elem">
-          <button ion-button (click)="changeName()">Name:</button>
-        </div>
-        <div class="txt">{{ userDetails.name }}</div>
-      </div>
-
-
-      <div id="block">
-        <div class="elem">
-          <button ion-button (click)="changeSurname()">Surname:</button>
-        </div>
-        <div class="txt">{{ userDetails.surname }}</div>
-      </div>
-
-      <div id="block">
-        <div class="elem">
-          <button ion-button (click)="changeUsername()">Username:</button>
-        </div>
-        <div class="txt">{{ userDetails.username }}</div>
-      </div>
-
-    <button ion-button  block (click)="changePassword()">
-      <div class="elem" floatLeft>Change Password</div>
-    </button>
-
-  </ion-list>
 
 </ion-content>

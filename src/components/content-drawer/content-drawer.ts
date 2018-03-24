@@ -106,13 +106,13 @@ export class ContentDrawer {
     /* Executed when user isSliding the screen (regarless of upwards or downwards) */
     } else {
       // When I am here? onSlide()
-      //console.log(ev.center.y);
+      console.log(ev.center.y);
       this.renderer.setElementStyle(this.element.nativeElement, 'transition', 'none');
 
       if(newTop > this.handleHeight/2 && newTop < (this.platform.height() - this.handleHeight)) {
-
+      	console.log('Hello1');
         if(ev.additionalEvent === "panup" || ev.additionalEvent === "pandown"){
-
+        console.log('Hello2');
           this.domCtrl.write(() => {
             this.renderer.setElementStyle(this.element.nativeElement, 'bottom', this.platform.height() - newTop + 'px');
           });
