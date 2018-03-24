@@ -1,9 +1,5 @@
 page-chat-m {
 
-    div#chatMessages {
-        margin-top: 56px;
-    }
-
     .innerMessage {
         display: inline-block;
         padding: 5px 10px;
@@ -73,33 +69,6 @@ page-chat-m {
     ion-toolbar {
       margin: 0;
       padding: 0;
-    }
-
-    content-drawer {
-      background-color: #34495e !important;
-
-    }
-
-    content-drawer .content {
-      padding: 20px;
-      font-size: 120%
-    }
-
-    div .drawerFooter {
-      display: block;
-      background-color: #f8f8f8 !important;
-      height: 56px;
-    }
-
-    div .drawerFooterText {
-      text-align: center;
-      padding-top:12px;
-      font-size: 2rem;
-      font-weight: 500;
-    }
-
-    .drawer>.content>.scroll-content{
-      margin-bottom: 0px !important;
     }
 
 }

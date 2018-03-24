@@ -1,22 +1,27 @@
 <ion-header>
   <ion-navbar>
     <ion-title>
-      Calendar
+      {{ viewTitle }}
     </ion-title>
+    <ion-buttons end>
+    	<button ion-button icon-only (click)="addEvent()">
+    		<ion-icon name = "add"></ion-icon>
+    	</button>
+    </ion-buttons>
   </ion-navbar>
 </ion-header>
 
 <ion-content>
-  <ion-list>
-    <ion-list-header>Follow us on Twitter</ion-list-header>
-    <ion-item>
-      <ion-icon name="ionic" item-start></ion-icon>
-      @ionicframework
-    </ion-item>
-  </ion-list>
+	<!-- array of events in the calendar -->
+	<!-- passes the event selected to function -->
+	<calendar
+	[eventSource]="eventSource" 
+	[calendarMode]="calendar.mode"
+	[currentDate]="calendar.currentDate"
+	(onEventSelected)="onEventSelected($event)"  
+	(onTitleChanged)="onViewTitleChanged($event)"
+	(onTimeSelected)="onTimeSelected($event)"
+	step="30"
+	class="calendar">
+	</calendar>
 </ion-content>
-
-<content-drawer [options]="drawerOptions">
-  Hello World!
-  <div class="content">Hello World!</div>
-</content-drawer>
