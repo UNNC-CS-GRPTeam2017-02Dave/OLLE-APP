@@ -2,6 +2,7 @@
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+require 'Ratchet/vendor/autoload.php';
 require 'PHPMailer/src/Exception.php';
 require 'PHPMailer/src/PHPMailer.php';
 require 'PHPMailer/src/SMTP.php';
@@ -15,6 +16,19 @@ $app->post('/login','login'); /* User login */
 $app->post('/signup','signup'); /* User Signup  */
 $app->post('/verifyAccount', 'verifyAccount');
 $app->post('/generateNewValidationCode', 'generateNewValidationCode');
+$app->post('/chat', 'chat');
+$app->post('/deleteChat', 'deleteChat');
+$app->post('/createChat', 'createChat');
+$app->post('/updateChat', 'updateChat');
+$app->post('/deleteMessages', 'deleteMessages');
+$app->post('/storeMessage', 'storeMessage');
+$app->post('/getFirstBatchMessages', 'getFirstBatchMessages');
+$app->post('/getNewMessages', 'getNewMessages');
+$app->post('/getBatchMessages', 'getBatchMessages');
+$app->post('/updateName', 'updateName');
+$app->post('/updateSurname', 'updateSurname');
+$app->post('/updateUsername', 'updateUsername');
+$app->post('/updatePassword', 'updatePassword');
 //$app->get('/getFeed','getFeed'); /* User Feeds  */
 //$app->post('/feed','feed'); /* User Feeds  */
 //$app->post('/feedUpdate','feedUpdate'); /* User Feeds  */
@@ -33,7 +47,7 @@ function login() {
 
         $db = getDB();
         $userData ='';
-        $sql = "SELECT user_id, name, email, username FROM users WHERE (username=:username or email=:username) and password=:password ";
+        $sql = "SELECT user_id, name, surname, email, username, user_account_status FROM users WHERE (username=:username or email=:username) and password=:password ";
         $stmt = $db->prepare($sql);
         $stmt->bindParam("username", $data->username, PDO::PARAM_STR);
         $password=hash('sha256',$data->password);
@@ -152,7 +166,7 @@ function signup() {
                             $data->valCode = $oldData->user_validation_code;
                             updateUserData($db, $data);
                             $userData = json_encode($data);
-                            echo  '{"dataStored":' .$userData .'}';
+                            echo  '{"userData":' .$userData .'}';
                         }
 
                     // using username from already registered user.
@@ -181,7 +195,7 @@ function signup() {
                     $data->valCode = $oldData->user_validation_code;
                     updateUserData($db, $data);
                     $userData = json_encode($data);
-                    echo  '{"dataStored":' .$userData .'}';
+                    echo  '{"userData":' .$userData .'}';
                 }
             }
 
@@ -207,8 +221,8 @@ function generateNewValidationCode () {
       $db = getDB();
       $sql = "UPDATE users SET user_validation_code=:valCode WHERE email=:email";
       $stmt = $db->prepare($sql);
-      $stmt->bindParam("valCode", $valCode);
-      $stmt->bindParam("email", $email);
+      $stmt->bindParam("valCode", $valCode, PDO::PARAM_INT);
+      $stmt->bindParam("email", $email, PDO::PARAM_STR);
       $stmt->execute();
       $db = null;
 
@@ -277,9 +291,9 @@ function sendEmail($email, $valCode){
   <p>Happy Language Learning,<br/>OLLE/VAV Team</p>";
 
 
-// add comments from PHPMailer
+  // add comments from PHPMailer
   $mail = new PHPMailer;
-  //echo '{"dataStored":{"text":"Email sent successfuly."}}';
+  //echo '{"userData":{"text":"Email sent successfuly."}}';
   $mail->SMTPDebug = 0;
   $mail->isSMTP();
   $mail->Host = /*'smtp-mail.outlook.com'*/'smtp.live.com';
@@ -302,7 +316,7 @@ function sendEmail($email, $valCode){
   if($mail->Send()){
       //echo '{"emailSent":{"text":"Email sent successfuly."}}';
       $userData = json_encode($userData);
-      echo  '{"dataStored":' .$userData .'}';
+      echo  '{"userData":' .$userData .'}';
 
   } else {
       //echo (extension_loaded('openssl')?'SSL loaded':'SSL not loaded')."\n";
@@ -310,6 +324,377 @@ function sendEmail($email, $valCode){
       //echo '{"emailSent":{"text":"Email sent successfuly."}}';
   }
 
+}
+
+/*############################# CHAT SYSTEM ##########################*/
+function chat() {
+
+  try {
+      $db = getDB();
+      $sql = "SELECT * FROM chat_languages";
+      $stmt = $db->prepare($sql);
+      $stmt->execute();
+
+      // fetchAll gets all elements in the array, while fetch just gets 1
+      $fData = $stmt->fetchAll(PDO::FETCH_OBJ);
+      $fData = json_encode($fData);
+      $db = null;
+      echo '{"fData":' .$fData.'}';
+
+  } catch(PDOException $e) {
+      echo '{"error":{"text":'. $e->getMessage() .'}}';
+  }
+}
+
+function deleteChat() {
+  $request = \Slim\Slim::getInstance()->request();
+  $data = json_decode($request->getBody());
+
+  try {
+      $db = getDB();
+
+      // should add foreign keys...
+      $sql = "DELETE FROM chat_languages WHERE chat_id=:chat_id AND (SELECT user_account_status FROM users WHERE user_id=:user_id)= 'admin'";
+      $stmt = $db->prepare($sql);
+      $stmt->bindParam("chat_id", $data->chat_id, PDO::PARAM_INT);
+      $stmt->bindParam("user_id", $data->user_id, PDO::PARAM_INT);
+      $stmt->execute();
+
+      $sql = "DELETE FROM chat_message WHERE chat_id=:chat_id AND (SELECT user_account_status FROM users WHERE user_id=:user_id)= 'admin'";
+      $stmt = $db->prepare($sql);
+      $stmt->bindParam("chat_id", $data->chat_id, PDO::PARAM_INT);
+      $stmt->bindParam("user_id", $data->user_id, PDO::PARAM_INT);
+      $stmt->execute();
+
+      $db = null;
+      echo '{"removed":"Chat has been removed."}';
+
+  } catch(PDOException $e) {
+      echo '{"error":{"text":'. $e->getMessage() .'}}';
+  }
+
+}
+
+function createChat() {
+  $request = \Slim\Slim::getInstance()->request();
+  $data = json_decode($request->getBody());
+
+  try {
+      $db = getDB();
+
+      // need to check it is an admin user
+      $sql = "INSERT INTO chat_languages(language, topic, description) VALUES (:language, :topic, :description)";
+      $stmt = $db->prepare($sql);
+      $stmt->bindParam("language", $data->language, PDO::PARAM_STR);
+      $stmt->bindParam("topic", $data->topic, PDO::PARAM_STR);
+      $stmt->bindParam("description", $data->description, PDO::PARAM_STR);
+      $stmt->execute();
+
+      $sql = "SELECT * FROM chat_languages ORDER BY chat_id DESC LIMIT 1";
+      $stmt = $db->prepare($sql);
+      $stmt->execute();
+
+      // fetchAll gets all elements in the array, while fetch just gets 1
+      $fData = $stmt->fetch(PDO::FETCH_OBJ);
+      $fData = json_encode($fData);
+      $db = null;
+      echo '{"fData":' .$fData.'}';
+
+      $db = null;
+
+  } catch(PDOException $e) {
+      echo '{"error":{"text":'. $e->getMessage() .'}}';
+  }
+}
+
+function updateChat() {
+  $request = \Slim\Slim::getInstance()->request();
+  $data = json_decode($request->getBody());
+
+  try {
+      $db = getDB();
+      // need to check it is an admin user
+
+      $sql = "UPDATE chat_languages SET topic=:topic, description=:description WHERE chat_id=:chat_id AND (SELECT user_account_status FROM users WHERE user_id=:user_id)= 'admin'";
+      $stmt = $db->prepare($sql);
+      $stmt->bindParam("topic", $data->topic, PDO::PARAM_STR);
+      $stmt->bindParam("description", $data->description, PDO::PARAM_STR);
+      $stmt->bindParam("chat_id", $data->chat_id, PDO::PARAM_INT);
+      $stmt->bindParam("user_id", $data->user_id, PDO::PARAM_INT);
+      $stmt->execute();
+
+      $db = null;
+      echo '{"updated":"Chat has been updated."}';
+
+  } catch(PDOException $e) {
+      echo '{"error":{"text":'. $e->getMessage() .'}}';
+  }
+}
+
+function deleteMessages() {
+  $request = \Slim\Slim::getInstance()->request();
+  $data = json_decode($request->getBody());
+
+  try {
+      $db = getDB();
+
+      // need to check for administrator rights
+      $sql = "DELETE FROM chat_message WHERE chat_id=:chat_id";
+      $stmt = $db->prepare($sql);
+      $stmt->bindParam("chat_id", $data->chat_id, PDO::PARAM_INT);
+      $stmt->execute();
+
+      $db = null;
+      echo '{"removed":"Messages have been deleted."}';
+
+  } catch(PDOException $e) {
+      echo '{"error":{"text":'. $e->getMessage() .'}}';
+  }
+}
+
+function storeMessage() {
+  $request = \Slim\Slim::getInstance()->request();
+  $data = json_decode($request->getBody());
+  $chat_id = $data->chat_id;
+  $user_id = $data->user_id;
+  $message = $data->message;
+
+  try {
+      // store message into the DB
+      $db = getDB();
+      $sql = "INSERT INTO chat_message(chat_id, user_id, message, time_sent) VALUES (:chat_id, :user_id,:message, NOW())";
+      $stmt = $db->prepare($sql);
+      //echo "Hello";
+      $stmt->bindParam("chat_id", $chat_id, PDO::PARAM_INT);
+      $stmt->bindParam("user_id", $user_id, PDO::PARAM_INT);
+      $stmt->bindParam("message", $message, PDO::PARAM_STR);
+      $stmt->execute();
+
+
+      //$fData = getMessages($chat_id);
+      //$fData = json_encode($fData);
+      //echo '{"fData": ' .$fData. '}';
+      echo '{"stored":{"text":"Message stored succesfully"}}';
+
+
+  } catch(PDOException $e) {
+      echo '{"error":{"text":'. $e->getMessage() .'}}';
+  }
+}
+
+function getFirstBatchMessages() {
+  $request = \Slim\Slim::getInstance()->request();
+  $data = json_decode($request->getBody());
+  try {
+      // store message into the DB
+      $db = getDB();
+      $sql = "SELECT message_id, users.user_id, username, message, time_sent
+              FROM users, ( SELECT *
+                            FROM chat_message
+                            WHERE chat_id=:chat_id
+                            ORDER BY message_id DESC
+                            LIMIT 15 ) subquery
+              WHERE users.user_id=subquery.user_id
+              ORDER BY message_id ASC";
+
+      $stmt = $db->prepare($sql);
+      $stmt->bindParam("chat_id", $data->chat_id, PDO::PARAM_INT);
+      $stmt->execute();
+
+      $fData = json_encode($stmt->fetchAll(PDO::FETCH_OBJ));
+      echo '{"fData": ' .$fData. '}';
+
+  } catch(PDOException $e) {
+      echo '{"error":{"text":'. $e->getMessage() .'}}';
+  }
+}
+
+function getBatchMessages() {
+  $request = \Slim\Slim::getInstance()->request();
+  $data = json_decode($request->getBody());
+  try {
+      // store message into the DB
+      $db = getDB();
+      $sql = "SELECT message_id, users.user_id, username, message, time_sent
+              FROM users, ( SELECT *
+                            FROM chat_message
+                            WHERE chat_id=:chat_id AND message_id <:message_id AND time_sent < :time_sent
+                            ORDER BY message_id DESC
+                            LIMIT 15 ) subquery
+              WHERE users.user_id=subquery.user_id
+              ORDER BY message_id ASC";
+
+      $stmt = $db->prepare($sql);
+      $stmt->bindParam("chat_id", $data->chat_id, PDO::PARAM_INT);
+      $stmt->bindParam("message_id", $data->message_id, PDO::PARAM_INT);
+      $stmt->bindParam("time_sent", $data->time, PDO::PARAM_STR);
+      $stmt->execute();
+
+      $fData = json_encode($stmt->fetchAll(PDO::FETCH_OBJ));
+      echo '{"fData": ' .$fData. '}';
+
+  } catch(PDOException $e) {
+      echo '{"error":{"text":'. $e->getMessage() .'}}';
+  }
+}
+
+function getNewMessages(){
+  $request = \Slim\Slim::getInstance()->request();
+  $data = json_decode($request->getBody());
+  try {
+      // store message into the DB
+      $db = getDB();
+      $sql = "SELECT message_id, users.user_id, username, message, time_sent FROM users, chat_message WHERE chat_id=:chat_id AND users.user_id=chat_message.user_id AND message_id > :message_id AND time_sent>=:time_sent";
+
+      $stmt = $db->prepare($sql);
+      $stmt->bindParam("chat_id", $data->chat_id, PDO::PARAM_INT);
+      $stmt->bindParam("message_id", $data->message_id, PDO::PARAM_INT);
+      $stmt->bindParam("time_sent", $data->time, PDO::PARAM_STR);
+      $stmt->execute();
+
+      $fData = json_encode($stmt->fetchAll(PDO::FETCH_OBJ));
+      echo '{"fData": ' .$fData. '}';
+
+  } catch(PDOException $e) {
+      echo '{"error":{"text":'. $e->getMessage() .'}}';
+  }
+
+}
+
+/*function getFirstBatchMessages($chat_id) {
+  try {
+      // store message into the DB
+      $db = getDB();
+      $sql = "SELECT message_id, username, message, time_sent FROM users, chat_message WHERE chat_id=:chat_id AND users.user_id=chat_message.user_id ORDER BY message_id ASC";
+
+      $stmt = $db->prepare($sql);
+      $stmt->bindParam("chat_id", $chat_id, PDO::PARAM_INT);
+      $stmt->execute();
+
+      return $stmt->fetchAll(PDO::FETCH_OBJ);
+
+  } catch(PDOException $e) {
+      echo '{"error":{"text":'. $e->getMessage() .'}}';
+  }
+}*/
+
+/*######################END CHAT SYSTEM#############################*/
+
+/*#######################SETTINGS############################*/
+function updateName() {
+  $request = \Slim\Slim::getInstance()->request();
+  $data = json_decode($request->getBody());
+  try {
+      // store message into the DB
+      $db = getDB();
+      $sql = "UPDATE users SET name=:name WHERE user_id=:user_id";
+      $stmt = $db->prepare($sql);
+      $stmt->bindParam("name", $data->data, PDO::PARAM_STR);
+      $stmt->bindParam("user_id", $data->user_id, PDO::PARAM_INT);
+      $stmt->execute();
+
+      $db = null;
+      $userData = json_encode(internalUserDetails($data->user_id));
+      echo '{"userData": ' .$userData. '}';
+
+  } catch(PDOException $e) {
+      echo '{"error":{"text":'. $e->getMessage() .'}}';
+  }
+}
+
+function updateSurname() {
+  $request = \Slim\Slim::getInstance()->request();
+  $data = json_decode($request->getBody());
+  try {
+      // store message into the DB
+      $db = getDB();
+      $sql = "UPDATE users SET surname=:surname WHERE user_id=:user_id";
+      $stmt = $db->prepare($sql);
+      $stmt->bindParam("surname", $data->data, PDO::PARAM_STR);
+      $stmt->bindParam("user_id", $data->user_id, PDO::PARAM_INT);
+      $stmt->execute();
+
+      $db = null;
+      $userData = json_encode(internalUserDetails($data->user_id));
+      echo '{"userData": ' .$userData. '}';
+      //echo '{"updateSuccess":"Update was successful."}';
+
+  } catch(PDOException $e) {
+      echo '{"error":{"text":'. $e->getMessage() .'}}';
+  }
+}
+
+function updateUsername() {
+  $request = \Slim\Slim::getInstance()->request();
+  $data = json_decode($request->getBody());
+  try {
+      // store message into the DB
+      $db = getDB();
+      $sql = "SELECT username FROM users WHERE user_id != $data->user_id AND username=:username";
+      $stmt = $db->prepare($sql);
+      $stmt->bindParam("username", $data->data,PDO::PARAM_STR);
+      $stmt->execute();
+      $isValidUsername = $stmt->rowCount();
+
+
+
+      if( $isValidUsername==0){
+          $sql = "UPDATE users SET username=:username WHERE user_id=:user_id";
+          $stmt = $db->prepare($sql);
+          $stmt->bindParam("username", $data->data, PDO::PARAM_STR);
+          $stmt->bindParam("user_id", $data->user_id, PDO::PARAM_INT);
+          $stmt->execute();
+          $db = null;
+          $userData = json_encode(internalUserDetails($data->user_id));
+          echo '{"userData": ' .$userData. '}';
+      }
+      else {
+          echo '{"error":"Username already exists"}';
+      }
+
+  } catch(PDOException $e) {
+      echo '{"error":{"text":'. $e->getMessage() .'}}';
+  }
+}
+
+function updatePassword() {
+  $request = \Slim\Slim::getInstance()->request();
+  $data = json_decode($request->getBody());
+  try {
+      // store message into the DB
+      $db = getDB();
+
+
+      $sql = "SELECT * FROM users WHERE user_id=:user_id AND password=:oldPassword";
+      $stmt = $db->prepare($sql);
+      $stmt->bindParam("user_id", $data->user_id, PDO::PARAM_INT);
+      $oldPass = hash('sha256', $data->oldPass);
+      $stmt->bindParam("oldPassword", $oldPass, PDO::PARAM_STR);
+      $stmt->execute();
+      $isValidPassword = $stmt->rowCount();
+
+      // check previous password
+      if( $isValidPassword ) {
+
+          $sql = "UPDATE users SET password=:newPassword WHERE user_id=:user_id";
+          $stmt = $db->prepare($sql);
+          $newPass = hash('sha256', $data->newPass);
+          $stmt->bindParam("newPassword", $newPass, PDO::PARAM_STR);
+          $stmt->bindParam("user_id", $data->user_id, PDO::PARAM_INT);
+          $stmt->execute();
+          $db = null;
+
+
+          echo '{"updateSuccess":"Update was successful."}';
+
+      } else {
+          $db = null;
+          echo '{"error":"Old password is not correct."}';
+      }
+
+  } catch(PDOException $e) {
+      echo '{"error":{"text":'. $e->getMessage() .'}}';
+  }
 }
 
 /*function email() {
@@ -367,7 +752,7 @@ function internalUserDetails($input) {
 
     try {
         $db = getDB();
-        $sql = "SELECT user_id, name, email, username, surname, user_account_status FROM users WHERE username=:input or email=:input";
+        $sql = "SELECT user_id, name, surname, email, username, user_account_status FROM users WHERE username=:input OR email=:input OR user_id=:input";
         $stmt = $db->prepare($sql);
         $stmt->bindParam("input", $input,PDO::PARAM_STR);
         $stmt->execute();
@@ -626,7 +1011,7 @@ function insertUserData ($db, $data){
   $stmt2->bindParam("surname", $surname,PDO::PARAM_STR);
   $accountStatus = "registered";
   $stmt2->bindParam("user_account_status", $accountStatus,PDO::PARAM_STR);
-  $stmt2->bindParam("user_validation_code", $valCode,PDO::PARAM_STR);
+  $stmt2->bindParam("user_validation_code", $valCode,PDO::PARAM_INT);
   $stmt2->execute();
 }
 
@@ -634,7 +1019,7 @@ function insertUserData ($db, $data){
 function getOldUserData ($db, $user_id) {
   $sql = "SELECT username, email, user_validation_code FROM users WHERE user_id=:user_id";
   $stmt = $db->prepare($sql);
-  $stmt->bindParam("user_id", $user_id,PDO::PARAM_STR);
+  $stmt->bindParam("user_id", $user_id,PDO::PARAM_INT);
   $stmt->execute();
 
   return $stmt->fetch(PDO::FETCH_OBJ);
@@ -650,8 +1035,8 @@ function updateUserData ($db, $data) {
   $stmt2->bindParam("email", $data->email,PDO::PARAM_STR);
   $stmt2->bindParam("name", $data->name,PDO::PARAM_STR);
   $stmt2->bindParam("surname", $data->surname,PDO::PARAM_STR);
-  $stmt2->bindParam("valCode", $data->valCode,PDO::PARAM_STR);
-  $stmt2->bindParam("user_id", $data->user_id,PDO::PARAM_STR);
+  $stmt2->bindParam("valCode", $data->valCode,PDO::PARAM_INT);
+  $stmt2->bindParam("user_id", $data->user_id,PDO::PARAM_INT);
   $stmt2->execute();
 }
 /****************************END REGISTRATION QUERIES*********************************/
