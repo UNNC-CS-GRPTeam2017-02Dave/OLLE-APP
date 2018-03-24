@@ -8,6 +8,7 @@ import { AuthServiceProvider } from '../../providers/auth-service/auth-service';
 })
 export class ChatNewFormPage {
   chatPostData = {"user_id":"", "language":"", "topic":"", "description":""};
+  responseData: any;
 
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public authService: AuthServiceProvider, private toastCtrl: ToastController) {
@@ -19,15 +20,23 @@ export class ChatNewFormPage {
   }
 
   create() {
-
     if( this.chatPostData.language && this.chatPostData.topic ) {
         this.authService.postData(this.chatPostData, "createChat").then((res) => {
+            this.responseData = res;
 
-            if(this.res.added) {
+            if(this.responseData.fData) {
               // push into items[] from chat.ts
               this.presentToast("Chat created successfully.");
 
+              /*let toStore = {
+                language: this.chatPostData.language,
+                topic: this.chatPostData.topic,
+                description: this.chatPostData.description
+              };*/
+
               // go to chat.ts, add into items[] array
+              localStorage.setItem('chatData', JSON.stringify(this.responseData) );
+              this.navCtrl.pop();
 
             } else {
               console.log("Failure to create chat.");

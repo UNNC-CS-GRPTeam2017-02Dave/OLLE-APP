@@ -15,6 +15,12 @@ export class AccountPage {
     this.userDetails = data.userData;
   }
 
+  /* Allows to update the user information on the screen while the page is loading */
+  ionViewWillEnter() {
+    let storage = JSON.parse(localStorage.getItem('userData'));
+    this.userDetails = storage.userData;
+  }
+
   gotoLoginPage(){
     // Back to main Screen
     //this.navCtrl.setRoot(LoginPage);

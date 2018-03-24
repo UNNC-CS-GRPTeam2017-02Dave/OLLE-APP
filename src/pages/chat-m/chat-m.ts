@@ -12,7 +12,7 @@ export class InstantMessagingPage {
   @ViewChild('footer') footer: any;
 
   item: any;
-  messages: any[];
+  messages: any[] = null;
   newMessages: any[];
   messageInfo: any;
   message: string;
@@ -23,10 +23,11 @@ export class InstantMessagingPage {
   supp: any;
   drawerOptions: any;
   displayOnLoad: boolean = false;
+  dataStored: any;
 
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public authService: AuthServiceProvider, public elRef:ElementRef) {
-      const data = JSON.parse(localStorage.getItem('userData'));
+      this.dataStored = JSON.parse(localStorage.getItem('userData'));
 
       this.item = navParams.get('item');
 
@@ -34,7 +35,7 @@ export class InstantMessagingPage {
       this.postUserMessage.chat_id    = this.item.chat_id;
       this.postNewMessageData.chat_id = this.item.chat_id;
       this.postOldMessageData.chat_id = this.item.chat_id;
-      this.supp = data.userData.username;
+      this.supp = this.dataStored.userData.username;
 
       this.getFirstBatchMessages();
       this.getNewMessages();
@@ -63,6 +64,32 @@ export class InstantMessagingPage {
 
     // load the drawer.
     this.displayOnLoad = true;
+  }
+
+  // Used to change data once after initial load and every user opens current page.
+  ionViewWillEnter() {
+    // Executed only if the page has been loaded (messages exist)
+    if( this.messages ) {
+
+      let oldUsername = this.dataStored.userData.username;
+      this.dataStored = JSON.parse(localStorage.getItem('userData'));
+      console.log(this.dataStored);
+
+      // User has changed username
+      if( oldUsername !== this.dataStored.userData.username ){
+
+        this.supp = this.dataStored.userData.username;
+
+        for( let i=0; i<this.messages.length; i++){
+
+            // find message who belonging to current user.
+            if( this.messages[i].user_id == this.dataStored.userData.user_id ){
+                // change name ()
+                this.messages[i].username = this.dataStored.userData.username;
+            }
+        }
+      }
+    }
   }
 
   getFirstBatchMessages() {
