@@ -15,38 +15,38 @@ export class ForumPage {
 	private topicsresponse: any;
 	items: any;
 	user_Data: any;
-	
-	 
-	constructor(public http:Http, public navCtrl: NavController, public app:App, private loadingCtrl: LoadingController, public ForumService: ForumService) {   
-     
+
+
+	constructor(public http:Http, public navCtrl: NavController, public app:App, private loadingCtrl: LoadingController, public ForumService: ForumService) {
+
 		let loadingPopup = this.loadingCtrl.create({
 			content: 'Loading posts...'
 		});
-		
-		ForumService.getTopics().subscribe(response => {
-			
+
+		this.ForumService.getTopics().subscribe(response => {
+
 			this.topicsresponse = response;
-	
+
 			this.initializeItems();
 			loadingPopup.dismiss();
-			
-		}); 
-		
+
+		});
+
 	}
-	
+
 	ngOnInit(){
-		
+
 		this.ForumService.getTopics().subscribe(response => {
 			this.items = response.TopicsData;
 		});
-		
+
 		this.user_Data = JSON.parse(localStorage.getItem('userData')).userData;
 
 	}
 
 	initializeItems() {
 		this.items = this.topicsresponse.TopicsData;
-		
+
 	}
 	/*
 	getItems(ev: any) {
@@ -63,19 +63,19 @@ export class ForumPage {
 	}
 	*/
 	viewItemDetail(item){
-		
+
 		this.navCtrl.push(ItemDetailPage, {
 			item: item
 		});
-		
+
 	}
 	goToNewTopicPage(){
 		this.navCtrl.push(NewtopicPage);
 	}
 
-	validate_status(){	
-		
-		if(this.user_Data.username == "SU")
+	validate_status(){
+
+		if(this.user_Data.username == "Jacobo")
 			return true;
 		else
 			return false;

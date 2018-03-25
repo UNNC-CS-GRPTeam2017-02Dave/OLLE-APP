@@ -6,6 +6,43 @@
   </ion-navbar>
 </ion-header>
 
-<ion-content padding>
+<ion-content>
+  <div *ngIf="isAdmin; else elseBlock">
+    <ion-list>
+      <div *ngFor="let item of items">
+        <ion-item-sliding >
+          <ion-item (click)="itemSelected(item)">
+            <ion-icon name="chatboxes" item-start></ion-icon>
+            {{ item.language }}
+            <!--<ion-icon name="flag"></ion-icon>-->
+          </ion-item>
+          <ion-item-options side="right">
+            <button class="inner-button" ion-button color="primary" (click)="edit(item)">
+              <ion-icon name="paper"></ion-icon>
+              Edit
+            </button>
+            <button class="inner-button" ion-button color="danger" (click)="delete(item)">
+              <ion-icon name="trash"></ion-icon>
+              Delete
+            </button>
+          </ion-item-options>
+
+        </ion-item-sliding>
+      </div>
+    </ion-list>
+  </div>
+  <ng-template #elseBlock>
+    <ion-list>
+      <button ion-item *ngFor="let item of items" (click)="itemSelected(item)">
+        <ion-icon name="chatboxes" item-start></ion-icon>
+        {{ item.language }}
+        <!--<ion-icon name="flag"></ion-icon>-->
+      </button>
+    </ion-list>
+  </ng-template>
+
+  <ion-fab right bottom>
+    <button ion-fab color="primary" (click)="createChat()"><ion-icon name="add"></ion-icon></button>
+  </ion-fab>
 
 </ion-content>

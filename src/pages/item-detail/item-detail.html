@@ -4,7 +4,7 @@
     <ion-toolbar no-border-top>
       <ion-searchbar (ionInput)="getItems($event)">
         <ion-icon name="search"></ion-icon>
-      </ion-searchbar>  
+      </ion-searchbar>
     </ion-toolbar>
   </ion-navbar>
 </ion-header>
@@ -34,46 +34,48 @@
 	<div id="buttonreply">
 		<button ion-button (click)="goToNewReply(item)" icon-left>
 		<ion-icon name="ios-undo">
-		</ion-icon>  Reply 
+		</ion-icon>  Reply
     </button>
   </div>
   </ion-card>
   -->
-  <ion-list>
-    <ion-card id="card" *ngFor="let item1 of items">
-	  <p>
-	  	<ion-icon name="ios-person">
-		</ion-icon>
-        <a> &nbsp;{{item1.username}} 's learning log</a>   	
-      </p>
-      <h2>&nbsp;&nbsp;{{item1.user_post}}</h2>
-            
-      <div id="viewbtn">
-      	<br><a>{{item1.post_date}}</a> 
-      	<br> 
-      	<button ion-button (click)="goToNewReply(item1)" >
-		 	<ion-icon name="ios-undo">
-			</ion-icon> Reply 
-		</button>
-		<button ion-button (click)="getPostedReply(item1)">
-		 	<ion-icon>
-			</ion-icon> Comments 
-		</button>
-      </div>
-      
-      <ion-list *ngFor="let item of posted_reply">
-      	<ion-card id="card"   *ngIf="comments_count(item, item1)"> 
-      		<p>
-	  		<ion-icon name="ios-person">
-			</ion-icon>
-        	<a> &nbsp;{{item.username}} 's learning log</a>   	
-      		</p>
-      		<h2>&nbsp;&nbsp;{{item.user_post}}</h2>
-      	</ion-card>
-      </ion-list>
-	
-   </ion-card>  
-  </ion-list>
+  <div id="cardList">
+    <ion-list>
+      <ion-card id="card" *ngFor="let item1 of items">
+  	  <p>
+  	  	<ion-icon name="ios-person">
+  		</ion-icon>
+          <a> &nbsp;{{item1.username}} 's learning log</a>
+        </p>
+        <h2>&nbsp;&nbsp;{{item1.user_post}}</h2>
+
+        <div id="viewbtn">
+        	<br><a>{{item1.post_date}}</a>
+        	<br>
+        	<button ion-button (click)="goToNewReply(item1)" >
+  		 	<ion-icon name="ios-undo">
+  			</ion-icon> Reply
+  		</button>
+  		<button ion-button (click)="getPostedReply(item1)">
+  		 	<ion-icon>
+  			</ion-icon> Comments
+  		</button>
+        </div>
+
+        <ion-list *ngFor="let item of posted_reply">
+        	<ion-card id="card"   *ngIf="comments_count(item, item1)">
+        		<p>
+  	  		<ion-icon name="ios-person">
+  			</ion-icon>
+          	<a> &nbsp;{{item.username}} 's learning log</a>
+        		</p>
+        		<h2>&nbsp;&nbsp;{{item.user_post}}</h2>
+        	</ion-card>
+        </ion-list>
+
+     </ion-card>
+    </ion-list>
+  </div>
 </ion-content>
 
 <ion-footer></ion-footer>

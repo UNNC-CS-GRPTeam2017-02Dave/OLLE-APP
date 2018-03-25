@@ -16,7 +16,11 @@ export class LoginPage {
   constructor(public navCtrl: NavController, public authService: AuthServiceProvider, public toastCtrl: ToastController, public alertCtrl: AlertController){
 
     // Open TabsPage if a user is already signed-in
-    
+    //localStorage.clear();
+    //networkinterface.getIPAddress(function (ip) {
+    /*alert(ip);
+  });*/
+    console.log(localStorage.getItem('userData'));
     if(localStorage.getItem('userData')){
       this.navCtrl.push(TabsPage);
       //this.navCtrl.setRoot(TabsPage);
@@ -29,13 +33,12 @@ export class LoginPage {
       this.authService.postData(this.userData, "login").then((result) => {
         this.responseData = result;
         // see what is coming from the api
-        //console.log( this.responseData );
+        console.log( this.responseData );
         // checks if user already exists
         if( this.responseData.userData ){
         // used to redirect to home page if a user is logged-in
           localStorage.setItem('userData', JSON.stringify(this.responseData)  )
-          //console.log(this.userData);
-		  //switch page
+          //switch page
           this.navCtrl.push(TabsPage);
         }
         else{
