@@ -1,0 +1,35 @@
+
+<ion-header>
+
+  <ion-navbar>
+    <div ion-row>
+      <div>
+        <button ion-button icon-start clear color="dark" (click)="back()">
+          <ion-icon name="arrow-round-back"></ion-icon>
+
+        </button>
+      </div>
+      <ion-title>General {{chatDetails.language}} Chat Settings</ion-title>
+      <div class="elem">
+        <button ion-button (click)="modify()">Save</button>
+      </div>
+    </div>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content>
+  <ion-item>
+    <ion-label color="primary" stacked>Topic</ion-label>
+    <ion-input [(ngModel)]="dataPost.topic">{{ chatDetails.topic }}</ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-label color="primary" stacked>Description</ion-label>
+    <ion-input ion-textarea [(ngModel)]="dataPost.description">{{chatDetails.description}}</ion-input>
+  </ion-item>
+
+  <button ion-button round block color="danger" (click)="deleteMessages()">Delete Messages</button>
+
+</ion-content>

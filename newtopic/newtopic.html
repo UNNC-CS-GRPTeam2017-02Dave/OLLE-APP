@@ -1,0 +1,51 @@
+<!--
+  Generated template for the NewtopicPage page.
+
+  See http://ionicframework.com/docs/components/#navigation for more info on
+  Ionic pages and navigation.
+-->
+<ion-header>
+  <ion-navbar color="primary" no-border-top>
+    <ion-toolbar color="primary" no-border-top>
+      <ion-title>Add Topic </ion-title>
+    </ion-toolbar>
+  </ion-navbar>
+</ion-header>
+
+
+<ion-content text-center padding>
+  <h1>Enter a new Topic</h1>
+  <ion-list>
+    <div id="new-topìc">
+		<ion-item>
+		<ion-label>Week</ion-label>
+		<!--miss ngModel here-->
+        <ion-input type="number" min="1" required="required" [(ngModel)]="topicData.topic_week"></ion-input>
+      </ion-item>
+		
+		
+      <ion-item>
+		<ion-label>Topic Title</ion-label>
+		<!--miss ngModel here-->
+        <ion-input type="text" required="required" [(ngModel)]="topicData.topic_title" ></ion-input>
+      </ion-item>
+
+      <ion-item>
+		<ion-label>Topic Detail</ion-label>
+		<!--miss ngModel here-->
+        <ion-input type="text" required="required" [(ngModel)]="topicData.topic_detail"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label>Deadline</ion-label>
+		<!--miss ngModel here-->
+        <ion-datetime displayFormat="YYYY-MM-DD" pickerFormat="YYYY MM DD" [(ngModel)]="topicData.topic_date"></ion-datetime>
+      </ion-item>
+
+      <button ion-button block (click)="postNewTopic()">ADD NEW</button>
+    </div>
+  </ion-list>
+
+
+
+</ion-content>

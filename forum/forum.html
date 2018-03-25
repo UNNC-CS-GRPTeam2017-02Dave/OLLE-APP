@@ -1,0 +1,39 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>Forum</ion-title>
+	
+	<!-- can add a search bar here-->
+  </ion-navbar>
+</ion-header>
+
+<ion-content>
+	<div text-center>
+		<h2>Topics List</h2>
+	</div>
+    <div text-right *ngIf="validate_status()">
+      <button ion-button (click)="goToNewTopicPage()" icon-left>
+        <ion-icon name="md-add-circle">
+        </ion-icon>     New Topic
+      </button>
+    </div>
+  <ion-list>
+  	<ion-item-sliding *ngFor="let item of items">
+    <ion-card ion-item id="card">
+      <h1>Week{{item.topic_week}}</h1> 
+	  <br><h1>{{item.topic_title}}</h1>
+	  
+      <div id="dateTopic"><a>{{item.topic_date}}</a></div>
+      <div id="viewbtn">
+        <button ion-button aling="right" (click)="viewItemDetail(item)">View</button>
+      </div>
+    </ion-card>
+    <ion-item-options>
+      <button ion-button color="danger" (click)="removeItem(week)"><ion-icon name="trash"></ion-icon>Delete</button>
+      <button ion-button color="primary"><ion-icon name="clipboard"></ion-icon>Edit</button>
+    </ion-item-options>
+    </ion-item-sliding>
+  </ion-list>
+
+
+</ion-content>
+
