@@ -2,7 +2,6 @@
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require 'Ratchet/vendor/autoload.php';
 require 'PHPMailer/src/Exception.php';
 require 'PHPMailer/src/PHPMailer.php';
 require 'PHPMailer/src/SMTP.php';
@@ -17,10 +16,16 @@ $app->post('/signup','signup'); /* User Signup  */
 $app->post('/verifyAccount', 'verifyAccount');
 $app->post('/generateNewValidationCode', 'generateNewValidationCode');
 $app->post('/chat', 'chat');
+$app->post('/deleteChat', 'deleteChat');
+$app->post('/createChat', 'createChat');
+$app->post('/updateChat', 'updateChat');
+$app->post('/deleteMessages', 'deleteMessages');
 $app->post('/storeMessage', 'storeMessage');
 $app->post('/getFirstBatchMessages', 'getFirstBatchMessages');
 $app->post('/getNewMessages', 'getNewMessages');
 $app->post('/getBatchMessages', 'getBatchMessages');
+$app->post('/getCalendarEvents', 'getCalendarEvents');
+$app->post('/storeCalendarEvent', 'storeCalendarEvent');
 $app->post('/updateName', 'updateName');
 $app->post('/updateSurname', 'updateSurname');
 $app->post('/updateUsername', 'updateUsername');
@@ -30,6 +35,11 @@ $app->post('/updatePassword', 'updatePassword');
 //$app->post('/feedUpdate','feedUpdate'); /* User Feeds  */
 //$app->post('/feedDelete','feedDelete'); /* User Feeds  */
 //$app->post('/getImages', 'getImages');
+$app->post('/postNewTopic','postNewTopic');
+//$app->post('/postNewTopicReply','postNewTopicReply');
+$app->post('/getForumReply','getForumReply');
+//$app->post('/getPostedReply','getPostedReply');
+$app->get('/getTopics','getTopics');
 
 $app->run();
 
@@ -43,7 +53,7 @@ function login() {
 
         $db = getDB();
         $userData ='';
-        $sql = "SELECT user_id, name, surname, email, username FROM users WHERE (username=:username or email=:username) and password=:password ";
+        $sql = "SELECT user_id, name, surname, email, username, user_account_status FROM users WHERE (username=:username or email=:username) and password=:password ";
         $stmt = $db->prepare($sql);
         $stmt->bindParam("username", $data->username, PDO::PARAM_STR);
         $password=hash('sha256',$data->password);
@@ -324,9 +334,9 @@ function sendEmail($email, $valCode){
 
 /*############################# CHAT SYSTEM ##########################*/
 function chat() {
-  $db = getDB();
-  try {
 
+  try {
+      $db = getDB();
       $sql = "SELECT * FROM chat_languages";
       $stmt = $db->prepare($sql);
       $stmt->execute();
@@ -334,7 +344,114 @@ function chat() {
       // fetchAll gets all elements in the array, while fetch just gets 1
       $fData = $stmt->fetchAll(PDO::FETCH_OBJ);
       $fData = json_encode($fData);
+      $db = null;
       echo '{"fData":' .$fData.'}';
+
+  } catch(PDOException $e) {
+      echo '{"error":{"text":'. $e->getMessage() .'}}';
+  }
+}
+
+function deleteChat() {
+  $request = \Slim\Slim::getInstance()->request();
+  $data = json_decode($request->getBody());
+
+  try {
+      $db = getDB();
+
+      // should add foreign keys...
+      $sql = "DELETE FROM chat_languages WHERE chat_id=:chat_id AND (SELECT user_account_status FROM users WHERE user_id=:user_id)= 'admin'";
+      $stmt = $db->prepare($sql);
+      $stmt->bindParam("chat_id", $data->chat_id, PDO::PARAM_INT);
+      $stmt->bindParam("user_id", $data->user_id, PDO::PARAM_INT);
+      $stmt->execute();
+
+      $sql = "DELETE FROM chat_message WHERE chat_id=:chat_id AND (SELECT user_account_status FROM users WHERE user_id=:user_id)= 'admin'";
+      $stmt = $db->prepare($sql);
+      $stmt->bindParam("chat_id", $data->chat_id, PDO::PARAM_INT);
+      $stmt->bindParam("user_id", $data->user_id, PDO::PARAM_INT);
+      $stmt->execute();
+
+      $db = null;
+      echo '{"removed":"Chat has been removed."}';
+
+  } catch(PDOException $e) {
+      echo '{"error":{"text":'. $e->getMessage() .'}}';
+  }
+
+}
+
+function createChat() {
+  $request = \Slim\Slim::getInstance()->request();
+  $data = json_decode($request->getBody());
+
+  try {
+      $db = getDB();
+
+      // need to check it is an admin user
+      $sql = "INSERT INTO chat_languages(language, topic, description) VALUES (:language, :topic, :description)";
+      $stmt = $db->prepare($sql);
+      $stmt->bindParam("language", $data->language, PDO::PARAM_STR);
+      $stmt->bindParam("topic", $data->topic, PDO::PARAM_STR);
+      $stmt->bindParam("description", $data->description, PDO::PARAM_STR);
+      $stmt->execute();
+
+      $sql = "SELECT * FROM chat_languages ORDER BY chat_id DESC LIMIT 1";
+      $stmt = $db->prepare($sql);
+      $stmt->execute();
+
+      // fetchAll gets all elements in the array, while fetch just gets 1
+      $fData = $stmt->fetch(PDO::FETCH_OBJ);
+      $fData = json_encode($fData);
+      $db = null;
+      echo '{"fData":' .$fData.'}';
+
+      $db = null;
+
+  } catch(PDOException $e) {
+      echo '{"error":{"text":'. $e->getMessage() .'}}';
+  }
+}
+
+function updateChat() {
+  $request = \Slim\Slim::getInstance()->request();
+  $data = json_decode($request->getBody());
+
+  try {
+      $db = getDB();
+      // need to check it is an admin user
+
+      $sql = "UPDATE chat_languages SET topic=:topic, description=:description WHERE chat_id=:chat_id AND (SELECT user_account_status FROM users WHERE user_id=:user_id)= 'admin'";
+      $stmt = $db->prepare($sql);
+      $stmt->bindParam("topic", $data->topic, PDO::PARAM_STR);
+      $stmt->bindParam("description", $data->description, PDO::PARAM_STR);
+      $stmt->bindParam("chat_id", $data->chat_id, PDO::PARAM_INT);
+      $stmt->bindParam("user_id", $data->user_id, PDO::PARAM_INT);
+      $stmt->execute();
+
+      $db = null;
+      echo '{"updated":"Chat has been updated."}';
+
+  } catch(PDOException $e) {
+      echo '{"error":{"text":'. $e->getMessage() .'}}';
+  }
+}
+
+function deleteMessages() {
+  $request = \Slim\Slim::getInstance()->request();
+  $data = json_decode($request->getBody());
+
+  try {
+      $db = getDB();
+
+      // need to check for administrator rights
+      $sql = "DELETE FROM chat_message WHERE chat_id=:chat_id";
+      $stmt = $db->prepare($sql);
+      $stmt->bindParam("chat_id", $data->chat_id, PDO::PARAM_INT);
+      $stmt->execute();
+
+      $db = null;
+      echo '{"removed":"Messages have been deleted."}';
 
   } catch(PDOException $e) {
       echo '{"error":{"text":'. $e->getMessage() .'}}';
@@ -347,7 +464,6 @@ function storeMessage() {
   $chat_id = $data->chat_id;
   $user_id = $data->user_id;
   $message = $data->message;
-
 
   try {
       // store message into the DB
@@ -378,7 +494,7 @@ function getFirstBatchMessages() {
   try {
       // store message into the DB
       $db = getDB();
-      $sql = "SELECT message_id, username, message, time_sent
+      $sql = "SELECT message_id, users.user_id, username, message, time_sent
               FROM users, ( SELECT *
                             FROM chat_message
                             WHERE chat_id=:chat_id
@@ -405,7 +521,7 @@ function getBatchMessages() {
   try {
       // store message into the DB
       $db = getDB();
-      $sql = "SELECT message_id, username, message, time_sent
+      $sql = "SELECT message_id, users.user_id, username, message, time_sent
               FROM users, ( SELECT *
                             FROM chat_message
                             WHERE chat_id=:chat_id AND message_id <:message_id AND time_sent < :time_sent
@@ -434,7 +550,7 @@ function getNewMessages(){
   try {
       // store message into the DB
       $db = getDB();
-      $sql = "SELECT message_id, username, message, time_sent FROM users, chat_message WHERE chat_id=:chat_id AND users.user_id=chat_message.user_id AND message_id > :message_id AND time_sent>=:time_sent";
+      $sql = "SELECT message_id, users.user_id, username, message, time_sent FROM users, chat_message WHERE chat_id=:chat_id AND users.user_id=chat_message.user_id AND message_id > :message_id AND time_sent>=:time_sent";
 
       $stmt = $db->prepare($sql);
       $stmt->bindParam("chat_id", $data->chat_id, PDO::PARAM_INT);
@@ -469,6 +585,194 @@ function getNewMessages(){
 }*/
 
 /*######################END CHAT SYSTEM#############################*/
+
+/*###########################CALENDAR#############################*/
+function getCalendarEvents() {
+  try {
+      // store message into the DB
+      $db = getDB();
+      $sql = "SELECT * FROM calendar_events WHERE endTime > NOW()";
+      $stmt = $db->prepare($sql);
+      $stmt->execute();
+      $fData = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+
+      $fData = json_encode($fData);
+      echo '{"fData": '.$fData.'}';
+
+
+  } catch(PDOException $e) {
+      echo '{"error":{"text":'. $e->getMessage() .'}}';
+  }
+}
+
+function storeCalendarEvent() {
+  $request = \Slim\Slim::getInstance()->request();
+  $data = json_decode($request->getBody());
+  $title = $data->title;
+  $description = $data->description;
+  $start_time = $data->startTime;
+  $end_time = $data->endTime;
+
+  try {
+      // store message into the DB
+      $db = getDB();
+      $sql = "INSERT INTO calendar_events(title, description, startTime, endTime ) VALUES (:title, :description,:start_time, :end_time)";
+      $stmt = $db->prepare($sql);
+      //echo "Hello";
+      $stmt->bindParam("title", $title, PDO::PARAM_STR);
+      $stmt->bindParam("description", $description, PDO::PARAM_STR);
+      $stmt->bindParam("start_time", $start_time, PDO::PARAM_STR);
+      $stmt->bindParam("end_time", $end_time, PDO::PARAM_STR);
+      $stmt->execute();
+
+      $db = null;
+      echo '{"stored":"Event stored succesfully"}';
+
+
+  } catch(PDOException $e) {
+      echo '{"error":{"text":'. $e->getMessage() .'}}';
+  }
+}
+
+/*########################END CALENDAR#############################*/
+
+/*#######################FORUM############################*/
+
+function postNewTopic(){
+	$request = \Slim\Slim::getInstance()->request();
+	$data = json_decode($request->getBody());
+
+	$topic_week=$data->topic_week;
+
+	if(is_numeric($topic_week))
+	{
+    	$topic_title = filter_var($data->topic_title, FILTER_SANITIZE_STRING);
+    	if((strlen($topic_title) > 0 and strlen($topic_title) < 300))
+    	{
+        	$topic_detail = filter_var($data->topic_detail, FILTER_SANITIZE_STRING);
+        	if((strlen($topic_detail) > 0 and strlen($topic_detail) < 500))
+        	{
+            	$topic_date=$data->topic_date;
+            	$user_id=$data->user_id;
+            	$post_username = filter_var($data->post_username, FILTER_SANITIZE_STRING);
+
+	            try {
+                	$db = getDB();
+                	$sql="INSERT INTO topics(topic_title,topic_detail,topic_date,topic_week,post_username, user_id)
+                	VALUES
+                	(:topic_title,:topic_detail,:topic_date,:topic_week,:post_username,:user_id)";
+
+                	$stmt = $db->prepare($sql);
+
+                	$stmt->bindParam("topic_title", $topic_title,PDO::PARAM_STR);
+                	$stmt->bindParam("topic_detail", $topic_detail,PDO::PARAM_STR);
+                	$stmt->bindParam("topic_date", $topic_date,PDO::PARAM_STR);
+                	$stmt->bindParam("topic_week", $topic_week,PDO::PARAM_INT);
+                	$stmt->bindParam("post_username", $post_username,PDO::PARAM_STR);
+                	$stmt->bindParam("user_id", $user_id,PDO::PARAM_STR);
+
+                	$stmt->execute();
+
+                	$db = null;
+
+                	echo '{"success":"Hello Tingting"}';
+	            }
+          	  catch(PDOException $e) {
+            	     echo '{"error":{"text":'. $e->getMessage() .'}}';
+              }
+        	}
+        	else
+        	{
+        	   echo '{"error3":{"text":"Invalid detail."}}';
+        	}
+    	}
+    	else
+    	{
+    	   echo '{"error2":{"text":"Invalid title."}}';
+    	}
+  	}
+  	else
+  	{
+  	echo '{"error1":{"text":"Invalid week number."}}';
+  	}
+	}
+
+function getForumReply(){
+	$request = \Slim\Slim::getInstance()->request();
+    $data = json_decode($request->getBody());
+    $topic_id = intval($data);
+
+	try {
+            $ForumReplyData = '';
+            $db = getDB();
+            $sql = "SELECT * FROM posts WHERE topic_id= :topic_id AND parent_id = 0";
+            $stmt = $db->prepare($sql);
+            $stmt->bindParam("topic_id", $topic_id, PDO::PARAM_INT);
+
+            $stmt->execute();
+            $ForumReplyData = $stmt->fetchAll(PDO::FETCH_OBJ);
+            $db = null;
+            if($ForumReplyData){
+				echo '{"ForumReplyData": ' . json_encode($ForumReplyData) . '}';
+            }else{
+				echo '{"ForumReplyData": ""}';
+			}
+    } catch(PDOException $e) {
+        echo '{"error":{"text":'. $e->getMessage() .'}}';
+    }
+}
+
+/*function getPostedReply(){
+	$request = \Slim\Slim::getInstance()->request();
+    $data = json_decode($request->getBody());
+    $parent_id = intval($data);
+
+	try {
+            $PostedReplyData = '';
+            $db = getDB();
+            $sql = "SELECT * FROM posts WHERE parent_id= :parent_id";
+            $stmt = $db->prepare($sql);
+            $stmt->bindParam("parent_id", $parent_id, PDO::PARAM_INT);
+
+            $stmt->execute();
+            $PostedReplyData = $stmt->fetchAll(PDO::FETCH_OBJ);
+            $db = null;
+
+            if($PostedReplyData){
+				echo '{"PostedReplyData": ' . json_encode($PostedReplyData) . '}';
+            }else{
+				echo '{"PostedReplyData": ""}';
+			}
+    } catch(PDOException $e) {
+        echo '{"error":{"text":'. $e->getMessage() .'}}';
+    }
+}*/
+function getTopics(){
+	try {
+        if(1){
+            $TopicsData = '';
+            $db = getDB();
+                $sql = "SELECT * FROM topics ORDER BY topic_week DESC";
+                $stmt = $db->prepare($sql);
+                $stmt->bindParam("topic_title", $topic_title, PDO::PARAM_STR);
+                $stmt->bindParam("topic_username", $topic_username, PDO::PARAM_STR);
+            	$stmt->execute();
+            	$TopicsData = $stmt->fetchAll(PDO::FETCH_OBJ);
+           		$db = null;
+            if($TopicsData){
+				echo '{"TopicsData": ' . json_encode($TopicsData) . '}';
+            }else{
+				echo '{"TopicsData": ""}';
+			}
+        } else{
+            echo '{"error":{"text":"No access"}}';
+        }
+    } catch(PDOException $e) {
+        echo '{"error":{"text":'. $e->getMessage() .'}}';
+    }
+}
+/*#######################END FORUM SYSTEM############################*/
 
 /*#######################SETTINGS############################*/
 function updateName() {
@@ -642,7 +946,7 @@ function internalUserDetails($input) {
 
     try {
         $db = getDB();
-        $sql = "SELECT user_id, name, surname, email, username FROM users WHERE username=:input OR email=:input OR user_id=:input";
+        $sql = "SELECT user_id, name, surname, email, username, user_account_status FROM users WHERE username=:input OR email=:input OR user_id=:input";
         $stmt = $db->prepare($sql);
         $stmt->bindParam("input", $input,PDO::PARAM_STR);
         $stmt->execute();
