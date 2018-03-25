@@ -1,6 +1,6 @@
 import { Component, ViewChild, ElementRef} from '@angular/core';
 import { IonicPage, NavController, NavParams, App, } from 'ionic-angular';
-import { NewreplypostPage} from '../newreplypost/newreplypost';
+//import { NewreplypostPage} from '../newreplypost/newreplypost';
 import { PostService } from '../../providers/post-service/post-service';
 
 /**
@@ -16,7 +16,7 @@ import { PostService } from '../../providers/post-service/post-service';
   templateUrl: 'item-detail.html',
 })
 export class ItemDetailPage {
-	
+
   @ViewChild('head') head: any;
   //@ViewChild('footer') footer: any;
 
@@ -28,27 +28,27 @@ export class ItemDetailPage {
   responseData: any;
   item1: any;
   posted_reply: any;
-  
+
   drawerOptions: any;
   displayOnLoad: boolean = false;
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public app: App, public PostService: PostService) {
-	  
+
     this.item = navParams.get('item');
     PostService.getForumReply("getForumReply",this.item.topic_id).then((result) => {
  		this.responseData = result;
-	 	this.items = this.responseData.ForumReplyData;	
+	 	this.items = this.responseData.ForumReplyData;
     }, (err) => {
-      //error message 
+      //error message
     });
-   
+
   }
-  
+
   ngAfterViewInit(){
   	let yAxisHeader: number = this.head.nativeElement.clientHeight;
 
   	console.log(yAxisHeader);
-  	
+
   	//let yAxisFooter: number = this.footer.nativeElement.clientHeight;
 
   	this.drawerOptions = {
@@ -59,47 +59,47 @@ export class ItemDetailPage {
   		bounceBack: true,
 
   		topContent: yAxisHeader,
-  		bottomContent: 0
+  		bottomContent: 56
   	};
 
   	this.displayOnLoad = true;
   }
 
   goToNewReply(item){
-	
+
     this.navCtrl.push(NewreplypostPage, {
       item: item
     });
   }
-  
+
   initializeItems() {
     this.items = this.replysresponse;
   }
 
   ngOnInit() {
-   	
+
     this.PostService.getForumReply("getForumReply",this.item.topic_id).then((result) => {
- 
+
 	 	this.responseData = result;
-	 	this.items = this.responseData.ForumReplyData;	
+	 	this.items = this.responseData.ForumReplyData;
     }, (err) => {
-      //error message 
+      //error message
     });
   }
 
   getPostedReply(parent){
-  	
+
   	this.PostService.getPostedReply("getPostedReply",parent.post_id).then((result) => {
- 		
+
 	 	this.responseData = result;
-	 	this.items = this.responseData.ForumReplyData;	
+	 	this.items = this.responseData.ForumReplyData;
     }, (err) => {
-      //error message 
+      //error message
     });
   }
 
-    comments_count(item, item1){	
-		
+    comments_count(item, item1){
+
 		if(item.parent_id == item1.post_id)
 			return true;
 		else
