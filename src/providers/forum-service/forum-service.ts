@@ -34,5 +34,43 @@ export class ForumService {
 			
         });
 		
-    }  
+    }
+
+
+    removeTopic(topic_id, type){
+
+    	return new Promise((resolve, reject) => {
+			
+            let headers = new Headers();
+			
+            this.http.post(apiUrl+type, JSON.stringify(topic_id), { headers: headers }).subscribe(res => {
+                
+				//console.log(res);
+				resolve(res.json());
+            }, (err) => {
+			
+                reject(err);
+            });
+			
+        });
+
+    }
+
+    get_user_status(user_id, type) {
+
+    	return new Promise((resolve, reject) => {
+			
+            let headers = new Headers();
+			
+            this.http.post(apiUrl+type, JSON.stringify(user_id), { headers: headers }).subscribe(res => {
+                
+				//console.log(res);
+				resolve(res.json());
+            }, (err) => {
+			
+                reject(err);
+            });
+			
+        });
+    }
 }

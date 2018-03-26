@@ -22,14 +22,14 @@
       <h1>Week{{item.topic_week}}</h1> 
 	  <br><h1>{{item.topic_title}}</h1>
 	  
-      <div id="dateTopic"><a>{{item.topic_date}}</a></div>
+      <div id="dateTopic">Deadline: <a>{{item.topic_date}}</a></div>
       <div id="viewbtn">
         <button ion-button aling="right" (click)="viewItemDetail(item)">View</button>
       </div>
     </ion-card>
-    <ion-item-options>
-      <button ion-button color="danger" (click)="removeItem(week)"><ion-icon name="trash"></ion-icon>Delete</button>
-      <button ion-button color="primary"><ion-icon name="clipboard"></ion-icon>Edit</button>
+    <ion-item-options *ngIf="validate_status()">
+      <button ion-button color="danger" (click)="removeTopic(item)"><ion-icon name="trash"></ion-icon>Delete</button>
+      <!--<button ion-button color="primary"><ion-icon name="clipboard"></ion-icon>Edit</button> -->
     </ion-item-options>
     </ion-item-sliding>
   </ion-list>

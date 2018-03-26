@@ -2,6 +2,7 @@ page-item-detail {
     #dateTopic{
          text-align: right;
     }
+
     #topicdetail{
         border: 1px solid  #488aff;
         border-radius: 4px;
@@ -9,37 +10,41 @@ page-item-detail {
         width: 95%;
         margin-right: 5%;
     }
+
     #card{
         width: 85%;
         border: 1px solid  #488aff;
         border-radius: 4px;
         padding:20px;
         margin-left: 15%;
-   
     }
+
     #buttonreply{
-        margin-right: 5%;
-		text-align: right;
+      margin-right: 5%;
+		  text-align: right;
     }
-	
-	#viewbtn{
-		margin-right: 1%;
-		text-align: right;
-	}
 
-	#btncomments{
-		margin-right: 1%;
-		text-align: right;
-	}
+  	#viewbtn{
+  		margin-right: 1%;
+  		text-align: right;
+  	}
+
+  	#btncomments{
+  		margin-right: 1%;
+  		text-align: right;
+  	}
+
+    div#cardList {
+      margin-top: 60px !important;
+    }
 
 
-	.icon {
-   		font-size: 20px;
-	}
+  	.icon {
+     		font-size: 20px;
+  	}
 
-	content-drawer {
-      background-color: #34495e !important;
-
+	  content-drawer {
+        background-color: #34495e !important;
     }
 
     content-drawer .content {
