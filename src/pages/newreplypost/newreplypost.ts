@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams, App, ToastController } from 'ionic-angular';
 import { PostService } from '../../providers/post-service/post-service';
 import { ItemDetailPage } from '../item-detail/item-detail';
-import { Http, Headers } from '@angular/http';
+
 
 /**
  * Generated class for the NewreplypostPage page.
@@ -18,13 +18,8 @@ import { Http, Headers } from '@angular/http';
 })
 export class NewreplypostPage {
   responseData: any;
-  public userDatail: any;
-  item1: any;
   item: any;
-  topicTitle: any;
-  itemFromTopic:any;
   
- 
   public userDataPK: String;
   
   postTopicReply = { "post_id":"","user_post": "", "username": "", "topic_id": "", "parent_id": "" };
@@ -33,6 +28,7 @@ export class NewreplypostPage {
   constructor(public navCtrl: NavController, public navParams: NavParams,public app: App, public PostService: PostService, public toastCtrl: ToastController) {
     this.item = navParams.get('item');
   }
+
   ngOnInit() {
      
   	this.postTopicReply.topic_id = this.item.topic_id;
@@ -50,7 +46,8 @@ export class NewreplypostPage {
 	  {
 		this.presentToast("Invalid reply");
 	  }
-	  else{
+	  else
+	  {
 	  	this.viewItemDetail(this.item);
 	  }      
     }, (err) => {
@@ -60,13 +57,12 @@ export class NewreplypostPage {
   }
 	
   viewItemDetail(item) {
-    this.navCtrl.push(ItemDetailPage, {
-      item: item
-    });
-  }
-	
-  ionViewDidLoad() {
-    //console.log('ionViewDidLoad NewreplypostPage');
+
+  	this.navCtrl.pop();
+	//this.navCtrl.pop();
+    //this.navCtrl.push(ItemDetailPage, {
+    //  item: item
+    //});
   }
 
   // Invalid User Input
