@@ -11,6 +11,8 @@ require 'Slim/Slim.php';
 \Slim\Slim::registerAutoloader();
 $app = new \Slim\Slim();
 
+$app->post('/isAdminUser','isAdminUser');
+
 $app->post('/login','login'); /* User login */
 $app->post('/signup','signup'); /* User Signup  */
 $app->post('/verifyAccount', 'verifyAccount');
@@ -21,11 +23,14 @@ $app->post('/createChat', 'createChat');
 $app->post('/updateChat', 'updateChat');
 $app->post('/deleteMessages', 'deleteMessages');
 $app->post('/storeMessage', 'storeMessage');
-$app->post('/getFirstBatchMessages', 'getFirstBatchMessages');
+$app->post('/getFirstBatchMessages', 'getFirstBatchMessages');  // Done
 $app->post('/getNewMessages', 'getNewMessages');
 $app->post('/getBatchMessages', 'getBatchMessages');
 $app->post('/getCalendarEvents', 'getCalendarEvents');
 $app->post('/storeCalendarEvent', 'storeCalendarEvent');
+$app->post('/updateCalendarEvent', 'updateCalendarEvent');
+$app->post('/deleteCalendarEvent', 'deleteCalendarEvent');
+$app->post('/removeOutdatedCalendarEvents', 'removeOutdatedCalendarEvents');
 $app->post('/updateName', 'updateName');
 $app->post('/updateSurname', 'updateSurname');
 $app->post('/updateUsername', 'updateUsername');
@@ -43,6 +48,46 @@ $app->get('/getTopics','getTopics');
 
 $app->run();
 
+
+function isValidUser($user_id, $token) {
+  return $token === apiToken($user_id);
+}
+
+function isAdminUser(){
+  $request = \Slim\Slim::getInstance()->request();
+  $data = json_decode($request->getBody());
+  try {
+      // security layer: token auth
+    if( isValidUser($data->user_id, $data->token) ){
+          $db = getDB();
+          $sql = "SELECT user_account_status FROM users WHERE user_id=:user_id";
+
+          $stmt = $db->prepare($sql);
+          $stmt->bindParam("user_id", $data->user_id, PDO::PARAM_INT);
+          $stmt->execute();
+
+          $fData = $stmt->fetch(PDO::FETCH_OBJ);
+          $db = null;
+
+          if( $fData->user_account_status === "admin" ){
+            echo '{"true":"Admin"}';
+
+          } else if( $fData->user_account_status === "master" ){
+            echo '{"isMaster":"Master"}';
+
+          } else {
+            echo '{"false":"Registered"}';
+          }
+
+      } else {
+          echo '{"LogoutError":"Access Denied"}';
+      }
+
+
+  } catch(PDOException $e) {
+      echo '{"error":{"text":'. $e->getMessage() .'}}';
+  }
+}
 /************************* USER LOGIN *************************************/
 function login() {
 
@@ -53,7 +98,7 @@ function login() {
 
         $db = getDB();
         $userData ='';
-        $sql = "SELECT user_id, name, surname, email, username, user_account_status FROM users WHERE (username=:username or email=:username) and password=:password ";
+        $sql = "SELECT user_id, name, surname, email, username FROM users WHERE (username=:username or email=:username) and password=:password ";
         $stmt = $db->prepare($sql);
         $stmt->bindParam("username", $data->username, PDO::PARAM_STR);
         $password=hash('sha256',$data->password);
@@ -466,21 +511,21 @@ function storeMessage() {
   $message = $data->message;
 
   try {
-      // store message into the DB
-      $db = getDB();
-      $sql = "INSERT INTO chat_message(chat_id, user_id, message, time_sent) VALUES (:chat_id, :user_id,:message, NOW())";
-      $stmt = $db->prepare($sql);
-      //echo "Hello";
-      $stmt->bindParam("chat_id", $chat_id, PDO::PARAM_INT);
-      $stmt->bindParam("user_id", $user_id, PDO::PARAM_INT);
-      $stmt->bindParam("message", $message, PDO::PARAM_STR);
-      $stmt->execute();
+      if( isValidUser($data->user_id, $data->token ) ){
+        $db = getDB();
+        $sql = "INSERT INTO chat_message(chat_id, user_id, message, time_sent) VALUES (:chat_id, :user_id,:message, NOW())";
+        $stmt = $db->prepare($sql);
+        //echo "Hello";
+        $stmt->bindParam("chat_id", $chat_id, PDO::PARAM_INT);
+        $stmt->bindParam("user_id", $user_id, PDO::PARAM_INT);
+        $stmt->bindParam("message", $message, PDO::PARAM_STR);
+        $stmt->execute();
 
+        echo '{"stored":{"text":"Message stored succesfully"}}';
 
-      //$fData = getMessages($chat_id);
-      //$fData = json_encode($fData);
-      //echo '{"fData": ' .$fData. '}';
-      echo '{"stored":{"text":"Message stored succesfully"}}';
+      } else {
+        echo '{"LogoutError":"Access Denied"}';
+      }
 
 
   } catch(PDOException $e) {
@@ -491,35 +536,42 @@ function storeMessage() {
 function getFirstBatchMessages() {
   $request = \Slim\Slim::getInstance()->request();
   $data = json_decode($request->getBody());
+
   try {
-      // store message into the DB
-      $db = getDB();
-      $sql = "SELECT message_id, users.user_id, username, message, time_sent
-              FROM users, ( SELECT *
-                            FROM chat_message
-                            WHERE chat_id=:chat_id
-                            ORDER BY message_id DESC
-                            LIMIT 15 ) subquery
-              WHERE users.user_id=subquery.user_id
-              ORDER BY message_id ASC";
+      // user verified successfuly
+    if( isValidUser($data->user_id, $data->token ) ){
+          $db = getDB();
+          $sql = "SELECT message_id, users.user_id, username, message, time_sent
+                  FROM users, ( SELECT *
+                                FROM chat_message
+                                WHERE chat_id=:chat_id
+                                ORDER BY message_id DESC
+                                LIMIT 15 ) subquery
+                  WHERE users.user_id=subquery.user_id
+                  ORDER BY message_id ASC";
 
-      $stmt = $db->prepare($sql);
-      $stmt->bindParam("chat_id", $data->chat_id, PDO::PARAM_INT);
-      $stmt->execute();
+          $stmt = $db->prepare($sql);
+          $stmt->bindParam("chat_id", $data->chat_id, PDO::PARAM_INT);
+          $stmt->execute();
 
-      $fData = json_encode($stmt->fetchAll(PDO::FETCH_OBJ));
-      echo '{"fData": ' .$fData. '}';
+          $fData = json_encode($stmt->fetchAll(PDO::FETCH_OBJ));
+          echo '{"fData": ' .$fData. '}';
+
+      } else {
+          echo '{"LogoutError":"Access Denied"}';
+      }
+
 
   } catch(PDOException $e) {
       echo '{"error":{"text":'. $e->getMessage() .'}}';
   }
-}
+}  // Done
 
 function getBatchMessages() {
   $request = \Slim\Slim::getInstance()->request();
   $data = json_decode($request->getBody());
   try {
-      // store message into the DB
+
       $db = getDB();
       $sql = "SELECT message_id, users.user_id, username, message, time_sent
               FROM users, ( SELECT *
@@ -567,23 +619,6 @@ function getNewMessages(){
 
 }
 
-/*function getFirstBatchMessages($chat_id) {
-  try {
-      // store message into the DB
-      $db = getDB();
-      $sql = "SELECT message_id, username, message, time_sent FROM users, chat_message WHERE chat_id=:chat_id AND users.user_id=chat_message.user_id ORDER BY message_id ASC";
-
-      $stmt = $db->prepare($sql);
-      $stmt->bindParam("chat_id", $chat_id, PDO::PARAM_INT);
-      $stmt->execute();
-
-      return $stmt->fetchAll(PDO::FETCH_OBJ);
-
-  } catch(PDOException $e) {
-      echo '{"error":{"text":'. $e->getMessage() .'}}';
-  }
-}*/
-
 /*######################END CHAT SYSTEM#############################*/
 
 /*###########################CALENDAR#############################*/
@@ -591,7 +626,7 @@ function getCalendarEvents() {
   try {
       // store message into the DB
       $db = getDB();
-      $sql = "SELECT * FROM calendar_events WHERE endTime > NOW()";
+      $sql = "SELECT * FROM calendar_events";/*WHERE endTime > NOW()";*/
       $stmt = $db->prepare($sql);
       $stmt->execute();
       $fData = $stmt->fetchAll(PDO::FETCH_OBJ);
@@ -615,10 +650,11 @@ function storeCalendarEvent() {
   $end_time = $data->endTime;
 
   try {
-      // store message into the DB
+
       $db = getDB();
       $sql = "INSERT INTO calendar_events(title, description, startTime, endTime ) VALUES (:title, :description,:start_time, :end_time)";
       $stmt = $db->prepare($sql);
+
       //echo "Hello";
       $stmt->bindParam("title", $title, PDO::PARAM_STR);
       $stmt->bindParam("description", $description, PDO::PARAM_STR);
@@ -626,8 +662,92 @@ function storeCalendarEvent() {
       $stmt->bindParam("end_time", $end_time, PDO::PARAM_STR);
       $stmt->execute();
 
+      $sql = "SELECT event_id FROM calendar_events ORDER BY event_id DESC";
+      $stmt = $db->prepare($sql);
+      $stmt->execute();
+      $event_id = $stmt->fetch(PDO::FETCH_OBJ);
+      echo $event_id;
       $db = null;
-      echo '{"stored":"Event stored succesfully"}';
+
+      echo '{"stored":' .json_encode($event_id). '}';
+
+  } catch(PDOException $e) {
+      echo '{"error":{"text":'. $e->getMessage() .'}}';
+  }
+}
+
+function updateCalendarEvent() {
+  $request = \Slim\Slim::getInstance()->request();
+  $data = json_decode($request->getBody());
+  $title = $data->title;
+  $description = $data->description;
+  $start_time = $data->startTime;
+  $end_time = $data->endTime;
+
+  try {
+
+      $db = getDB();
+
+      $sql = "UPDATE calendar_events SET title=:title, description=:description, startTime=:start_time, endTime=:end_time WHERE event_id=:event_id";
+      $stmt = $db->prepare($sql);
+      $stmt->bindParam("event_id", $data->event_id, PDO::PARAM_INT);
+
+      //echo "Hello";
+      $stmt->bindParam("title", $title, PDO::PARAM_STR);
+      $stmt->bindParam("description", $description, PDO::PARAM_STR);
+      $stmt->bindParam("start_time", $start_time, PDO::PARAM_STR);
+      $stmt->bindParam("end_time", $end_time, PDO::PARAM_STR);
+      $stmt->execute();
+
+      $sql = "SELECT MAX(event_id) FROM calendar_events";
+      $stmt = $db->prepare($sql);
+      $stmt->execute();
+      $event_id = $stmt->fetch(PDO::FETCH_OBJ);
+
+      $db = null;
+      echo '{"updated":"Event stored succesfully"}';
+
+
+  } catch(PDOException $e) {
+      echo '{"error":{"text":'. $e->getMessage() .'}}';
+  }
+}
+
+function deleteCalendarEvent() {
+  $request = \Slim\Slim::getInstance()->request();
+  $data = json_decode($request->getBody());
+
+  try {
+      // security layer: token auth
+    if( isValidUser($data->user_id, $data->token) ){
+          $db = getDB();
+          $sql = "DELETE FROM calendar_events WHERE event_id=:event_id";
+
+          $stmt = $db->prepare($sql);
+          $stmt->bindParam("event_id", $data->event_id, PDO::PARAM_INT);
+          $stmt->execute();
+          $db = null;
+
+          echo '{"deleted":"Event deleted successfuly."}';
+
+      } else {
+          echo '{"LogoutError":"Access Denied"}';
+      }
+
+
+  } catch(PDOException $e) {
+      echo '{"error":{"text":'. $e->getMessage() .'}}';
+  }
+}
+
+function removeOutdatedCalendarEvents(){
+  try {
+      $db = getDB();
+      $sql = "DELETE FROM calendar_events WHERE endTime < NOW()";
+      $stmt = $db->prepare($sql);
+      $stmt->execute();
+
+      echo '{"deleted":"Events deleted successfuly."}';
 
 
   } catch(PDOException $e) {
@@ -946,7 +1066,7 @@ function internalUserDetails($input) {
 
     try {
         $db = getDB();
-        $sql = "SELECT user_id, name, surname, email, username, user_account_status FROM users WHERE username=:input OR email=:input OR user_id=:input";
+        $sql = "SELECT user_id, name, surname, email, username FROM users WHERE username=:input OR email=:input OR user_id=:input";
         $stmt = $db->prepare($sql);
         $stmt->bindParam("input", $input,PDO::PARAM_STR);
         $stmt->execute();
