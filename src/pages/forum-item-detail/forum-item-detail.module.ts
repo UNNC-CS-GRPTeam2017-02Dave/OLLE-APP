@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { IonicPageModule } from 'ionic-angular';
-import { ItemDetailPage } from './item-detail';
+import { ItemDetailPage } from './forum-item-detail';
 
 @NgModule({
   declarations: [

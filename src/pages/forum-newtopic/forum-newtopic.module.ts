@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { IonicPageModule } from 'ionic-angular';
-import { NewtopicPage } from './newtopic';
+import { NewtopicPage } from './forum-newtopic';
 
 @NgModule({
   declarations: [

@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { Http } from '@angular/http';
 import { NavController, App } from 'ionic-angular';
-import { ForumService } from '../../providers/forum-service/forum-service';
-import { NewtopicPage} from '../newtopic/newtopic';
-import { ItemDetailPage} from '../item-detail/item-detail';
+import { GenericProvider } from '../../providers/generic/generic';
+import { NewtopicPage} from '../forum-newtopic/forum-newtopic';
+import { ItemDetailPage} from '../forum-item-detail/forum-item-detail';
 import 'rxjs/add/operator/map';
 
 @Component({
@@ -12,69 +12,82 @@ import 'rxjs/add/operator/map';
 })
 export class ForumPage {
 
-	private topicsresponse: any;
 	items: any;
-	user_Data: any;
-	user_status: any;
 	responseData:any;
-	
-	 
-	constructor(public http:Http, public navCtrl: NavController, public app:App, public ForumService: ForumService) {   
-		this.ForumService.getTopics().subscribe(response => {
-			this.items = response.TopicsData;
-		});
+	userPostData = {"user_id":"", "token":""};
+ 	storage: any;
+ 	isAdmin: boolean = false;
+ 	isMaster: boolean = false;
 
-		this.user_Data = JSON.parse(localStorage.getItem('userData')).userData;
 
-		this.ForumService.get_user_status(this.user_Data.user_id, "get_user_status").then((result) => {
-      		this.responseData = result; 
-      		this.user_status = this.responseData.userInfo[0].user_account_status;
-
-    	}, (err) => {
-      	//error message
-    	});
+	constructor(public http:Http, public navCtrl: NavController, public app:App, public GenericProvider: GenericProvider) {   
+		
 	}
 	
 	ngOnInit(){
+		this.storage = JSON.parse(localStorage.getItem('userData')).userData;
+    	console.log(this.storage);
+
+    	this.userPostData.user_id = this.storage.user_id;
+    	this.userPostData.token  = this.storage.token;
 		
-		this.ForumService.getTopics().subscribe(response => {
-			this.items = response.TopicsData;
+		this.GenericProvider.getTopics().subscribe(response => {
+			this.responseData = response;
+			this.items = this.responseData.TopicsData;
 		});
 
-		this.user_Data = JSON.parse(localStorage.getItem('userData')).userData;
+		this.getAdmin();
 	}
 
+	/*
 	initializeItems() {
-		this.items = this.topicsresponse.TopicsData;		
+		this.items = this.responseData.TopicsData;		
 	}
-	
+	*/
 	viewItemDetail(item){
 		
 		this.navCtrl.push(ItemDetailPage, {
 			item: item
-		});
-		
+		});	
 	}
+
 	goToNewTopicPage(){
 		this.navCtrl.push(NewtopicPage);
 	}
 
-	validate_status(){	
+	getAdmin(){
 
-		if(this.user_status == "admin")
-			return true;
-		else
-			return false;
-	}
+    	this.GenericProvider.postData(this.userPostData, "isAdminUser").then((res) => {
+      		this.responseData = res;
+
+      		// isAdmin
+      		if( this.responseData.true ) {
+       		 this.isAdmin = true;
+
+      		} else if ( this.responseData.isMaster ) {
+        		this.isMaster = true;
+       
+      		}
+
+    		}, (err) => {
+      
+    		});
+    }
 
 	removeTopic(item)
-	{
-		this.ForumService.removeTopic(item.topic_id, "removeTopic").then((result) => {
+	{		
+		this.GenericProvider.postData(item.topic_id, "removeTopic").then((result) => {
       		this.responseData = result; 
-      		this.items.splice(this.items.indexOf(item), 1);
-      		   
+      		this.items.splice(this.items.indexOf(item), 1);   		   
     	}, (err) => {
-      	//error message
-    	});
+      		//error message
+    	});	
+	}
+
+	editTopic(item)	
+	{
+		this.navCtrl.push(NewtopicPage, {
+			item: item
+		});
 	}
 }

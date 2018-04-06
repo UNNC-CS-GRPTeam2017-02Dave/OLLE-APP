@@ -21,11 +21,11 @@ import { ContentDrawer } from '../components/content-drawer/content-drawer';
 
 
 //new
-import { NewtopicPage} from '../pages/newtopic/newtopic';
-import { ForumService } from '../providers/forum-service/forum-service';
-import { ItemDetailPage} from '../pages/item-detail/item-detail';
-import { NewreplypostPage} from '../pages/newreplypost/newreplypost';
-import { PostService} from '../providers/post-service/post-service';
+import { NewtopicPage} from '../pages/forum-newtopic/forum-newtopic';
+import { ItemDetailPage} from '../pages/forum-item-detail/forum-item-detail';
+import { ForumReplyPage} from '../pages/forum-reply-modal/forum-reply-modal';
+import { GenericProvider} from '../providers/generic/generic';
+
 
 @NgModule({
   declarations: [
@@ -40,10 +40,11 @@ import { PostService} from '../providers/post-service/post-service';
     TabsPage,
 	NewtopicPage,
 	ItemDetailPage,
-	NewreplypostPage
+	ForumReplyPage
   ],
   imports: [
-    BrowserModule, HttpModule,
+    BrowserModule,
+    HttpModule,
     IonicModule.forRoot(MyApp)
   ],
   bootstrap: [IonicApp],
@@ -58,15 +59,14 @@ import { PostService} from '../providers/post-service/post-service';
     TabsPage,
 	NewtopicPage,
 	ItemDetailPage,
-	NewreplypostPage
+	ForumReplyPage
   ],
   providers: [
     StatusBar,
     SplashScreen,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     AuthServiceProvider,
-	ForumService,
-	PostService
+	GenericProvider
   ]
 })
 export class AppModule {}

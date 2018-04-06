@@ -11,6 +11,8 @@ require 'Slim/Slim.php';
 \Slim\Slim::registerAutoloader();
 $app = new \Slim\Slim();
 
+$app->post('/isAdminUser','isAdminUser');
+
 $app->post('/login','login'); /* User login */
 $app->post('/signup','signup'); /* User Signup  */
 $app->post('/verifyAccount', 'verifyAccount');
@@ -18,6 +20,9 @@ $app->post('/postNewTopic','postNewTopic');
 $app->post('/postNewTopicReply','postNewTopicReply');
 $app->post('/getForumReply','getForumReply');
 $app->post('/getPostedReply','getPostedReply');
+$app->post('/removeTopic','removeTopic');
+$app->post('/userTag','userTag');
+
 
 $app->get('/getTopics','getTopics');
 
@@ -68,13 +73,87 @@ function login() {
     	}
 }
 
+
+function isValidUser($user_id, $token) {
+  return $token === apiToken($user_id);
+}
+
+function isAdminUser(){
+  $request = \Slim\Slim::getInstance()->request();
+  $data = json_decode($request->getBody());
+
+  try {
+      // security layer: token auth
+    if( isValidUser($data->user_id, $data->token) ){
+          $db = getDB();
+          $sql = "SELECT user_account_status FROM users WHERE user_id=:user_id";
+
+          $stmt = $db->prepare($sql);
+          $stmt->bindParam("user_id", $data->user_id, PDO::PARAM_INT);
+          $stmt->execute();
+
+          $fData = $stmt->fetch(PDO::FETCH_OBJ);
+          $db = null;
+
+          if( $fData->user_account_status === "admin" ){
+            echo '{"true":"Admin"}';
+
+          } else if( $fData->user_account_status === "master" ){
+            echo '{"isMaster":"Master"}';
+
+          } else {
+            echo '{"false":"Registered"}';
+          }
+
+      } else {
+          echo '{"LogoutError":"Access Denied"}';
+      }
+
+
+  } catch(PDOException $e) {
+      echo '{"error":{"text":'. $e->getMessage() .'}}';
+  }
+}
+
+function userTag(){
+	$request = \Slim\Slim::getInstance()->request();
+    $data = json_decode($request->getBody());
+
+    try {
+      
+          $db = getDB();
+          $sql = "SELECT * FROM users WHERE user_id=:user_id";
+
+          $stmt = $db->prepare($sql);
+          $stmt->bindParam("user_id", $data, PDO::PARAM_INT);
+          $stmt->execute();
+
+          $userTag = $stmt->fetchAll(PDO::FETCH_OBJ);
+     
+          $db = null;
+
+          if($userTag){
+				echo '{"userTag": ' . json_encode($userTag) . '}';
+          }else{
+				echo '{"userTag": ""}';
+			}
+     
+  } catch(PDOException $e) {
+      echo '{"error":{"text":'. $e->getMessage() .'}}';
+  }
+
+}
+
+
 function postNewTopicReply(){
 	$request = \Slim\Slim::getInstance()->request();
     $data = json_decode($request->getBody());
 	
 	$topic_id = $data->topic_id;
 	$username = $data->username;
+	$tag = $data->tag;
 	$parent_id = $data->parent_id;
+
 
 	date_default_timezone_set('PRC'); 
 	$post_date = date("Y-m-d H:i:s");
@@ -89,14 +168,15 @@ function postNewTopicReply(){
 	{
 		try {		
 				$db = getDB();       		
-				$sql="INSERT INTO posts(topic_id,username,user_post,parent_id,post_date)
+				$sql="INSERT INTO posts(topic_id,username,tag,user_post,parent_id,post_date)
 										VALUES
-										(:topic_id,:username,:user_post,:parent_id, :post_date)";
+										(:topic_id,:username,:tag,:user_post,:parent_id, :post_date)";
 
 				$stmt = $db->prepare($sql);
 		
-				$stmt->bindParam("topic_id", $topic_id,PDO::PARAM_STR);
+				$stmt->bindParam("topic_id", $topic_id,PDO::PARAM_INT);
 				$stmt->bindParam("username", $username,PDO::PARAM_STR);
+				$stmt->bindParam("tag", $tag, PDO::PARAM_STR);
 				$stmt->bindParam("user_post", $user_post,PDO::PARAM_STR);
 				$stmt->bindParam("parent_id", $parent_id,PDO::PARAM_INT);
 				$stmt->bindParam("post_date", $post_date,PDO::PARAM_STR);
@@ -115,11 +195,40 @@ function postNewTopicReply(){
 	}
 }
 
+function removeTopic(){
+	$request = \Slim\Slim::getInstance()->request();
+    $data = json_decode($request->getBody());
+	
+	$topic_id=$data;
+
+	try {		
+				$db = getDB();       		
+				$sql="DELETE FROM topics WHERE topic_id=:topic_id";
+				$stmt = $db->prepare($sql);		
+				$stmt->bindParam("topic_id", $topic_id,PDO::PARAM_INT);	
+				$stmt->execute();
+
+
+				$sql2 ="DELETE FROM posts WHERE topic_id=:topic_id";
+				$stmt2 = $db->prepare($sql2);		
+				$stmt2->bindParam("topic_id", $topic_id,PDO::PARAM_INT);	
+				$stmt2->execute();	
+		
+				$db = null;	
+				echo '{"success":"Hello Tingting"}';
+		}
+		catch(PDOException $e) {
+				echo '{"error":{"text":'. $e->getMessage() .'}}';
+		}
+
+}
+
 function postNewTopic(){
 	$request = \Slim\Slim::getInstance()->request();
     $data = json_decode($request->getBody());
 	
-	$topic_week=$data->topic_week;	
+	$topic_week=$data->topic_week;
+
 
 	if(is_numeric($topic_week))
 	{
@@ -134,13 +243,23 @@ function postNewTopic(){
 				$post_username = filter_var($data->post_username, FILTER_SANITIZE_STRING);
 						
 				try {		
-						$db = getDB();       		
-						$sql="INSERT INTO topics(topic_title,topic_detail,topic_date,topic_week,post_username, user_id)
+						$db = getDB();
+						$topic_id = $data->topic_id;
+						if($topic_id) 
+						{
+							$sql="UPDATE topics SET topic_title=:topic_title, topic_detail=:topic_detail, topic_date=:topic_date, topic_week=:topic_week, post_username=:post_username,user_id=:user_id WHERE topic_id = :topic_id";
+							$stmt = $db->prepare($sql);
+							$stmt->bindParam("topic_id", $topic_id,PDO::PARAM_INT);	
+						} 
+						else{
+							$sql="INSERT INTO topics(topic_title,topic_detail,topic_date,topic_week,post_username,user_id)
 												VALUES
 												(:topic_title,:topic_detail,:topic_date,:topic_week,:post_username,:user_id)";
+						    $stmt = $db->prepare($sql);
+						}    		
+						
 
-						$stmt = $db->prepare($sql);
-		
+								
 						$stmt->bindParam("topic_title", $topic_title,PDO::PARAM_STR);
 						$stmt->bindParam("topic_detail", $topic_detail,PDO::PARAM_STR);
 						$stmt->bindParam("topic_date", $topic_date,PDO::PARAM_STR);
@@ -212,15 +331,17 @@ function getPostedReply(){
 	$request = \Slim\Slim::getInstance()->request();
     $data = json_decode($request->getBody());
 
-    $parent_id = intval($data);
+    $topic_id = $data->topic_id;
+    $parent_id = $data->parent_id;
   
 	try {       
             $PostedReplyData = '';
             $db = getDB();
 
-            $sql = "SELECT * FROM posts WHERE parent_id= :parent_id";           
+            $sql = "SELECT * FROM posts WHERE parent_id =:parent_id AND topic_id = :topic_id";           
 
             $stmt = $db->prepare($sql); 
+            $stmt->bindParam("topic_id", $topic_id, PDO::PARAM_INT);
             $stmt->bindParam("parent_id", $parent_id, PDO::PARAM_INT);
              
             $stmt->execute();
@@ -270,6 +391,40 @@ function getTopics(){
         echo '{"error":{"text":'. $e->getMessage() .'}}';
     }	
 }
+
+function get_user_info(){
+
+	$request = \Slim\Slim::getInstance()->request();
+    $data = json_decode($request->getBody());
+   
+    $user_id = intval($data);
+  
+	try {       
+            $userInfo = '';
+            $db = getDB();
+
+            $sql = "SELECT * FROM users WHERE user_id= :user_id";           
+
+            $stmt = $db->prepare($sql); 
+            $stmt->bindParam("user_id", $user_id, PDO::PARAM_INT);
+             
+            $stmt->execute();
+
+            $userInfo = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+            $db = null;
+            
+            if($userInfo){
+				echo '{"userInfo": ' . json_encode($userInfo) . '}';
+            }else{
+				echo '{"userInfo": ""}';
+			}
+    } catch(PDOException $e) {
+        echo '{"error":{"text":'. $e->getMessage() .'}}';
+    }
+}
+
+
 
 /* I should check what variables are necessary and which others can be gotten rid off.*/
 /************************* USER REGISTRATION *************************************/

@@ -56,7 +56,7 @@ export class ForumService {
 
     }
 
-    get_user_status(user_id, type) {
+    get_user_info(user_id, type) {
 
     	return new Promise((resolve, reject) => {
 			

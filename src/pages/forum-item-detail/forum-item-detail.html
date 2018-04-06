@@ -1,6 +1,6 @@
 <ion-header>
   <ion-navbar text-center no-border-top>
-    <ion-title>Topic Detail  </ion-title>
+    <ion-title></ion-title>
     <ion-toolbar no-border-top>
       <ion-searchbar (ionInput)="getItems($event)">
         <ion-icon name="search"></ion-icon>
@@ -8,19 +8,7 @@
     </ion-toolbar>
   </ion-navbar>
 </ion-header>
-<!--
-<div *ngIf="displayOnLoad">
-  <content-drawer class="drawer"[options]="drawerOptions">
-    <div class="content">{{item.topic_detail}}</div><br>
-    <a>Created at: {{item.topic_date}}</a>
-    <ion-footer>
-      <div class="drawerFooter">
-        <div class="drawerFooterText">Subject: {{item.topic_title}}</div>
-      </div>
-    </ion-footer>
-  </content-drawer>
-</div>
--->
+
 <ion-content padding>
 	
   <ion-card id="topicdetail">
@@ -45,7 +33,7 @@
 	  	<ion-icon name="ios-person">
 		</ion-icon>
         <a> &nbsp;{{item1.username}} </a> 
-            &nbsp;Category: <a>Chinese</a>  	
+            &nbsp;Tag: <a>{{item1.tag}}</a>  	
       </p>
       <h2>&nbsp;&nbsp;{{item1.user_post}}</h2>
             
@@ -68,7 +56,7 @@
 	  		<ion-icon name="ios-person">
 			</ion-icon>
         	<a> &nbsp;{{item.username}}</a>
-        		&nbsp;Category: <a>Chinese</a>   	
+        		&nbsp;Tag: <a>{{item.tag}} </a> 	
       		</p>
       		<h2>&nbsp;&nbsp;{{item.user_post}}</h2>
       	</ion-card>
