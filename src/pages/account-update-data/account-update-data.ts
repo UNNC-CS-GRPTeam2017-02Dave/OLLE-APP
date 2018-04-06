@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { NavController, NavParams, ToastController } from 'ionic-angular';
-import { AuthServiceProvider } from '../../providers/auth-service/auth-service';
+import { GenericProvider } from '../../providers/generic/generic';
 
 @Component({
   selector: 'page-account-update-data',
@@ -11,7 +11,7 @@ export class AccountUpdateDataPage {
   responseData: any;
   userInfo = {"data":"", "user_id":""};
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public toastCtrl: ToastController, public authService: AuthServiceProvider) {
+  constructor(public navCtrl: NavController, public navParams: NavParams, public toastCtrl: ToastController, public genProvider: GenericProvider) {
     this.userDetails = navParams.get('item');
     this.userInfo.user_id = this.userDetails.user_id;
   }
@@ -22,7 +22,7 @@ export class AccountUpdateDataPage {
 
     if( this.userInfo.data ) {
 
-      this.authService.postData(this.userInfo, this.userDetails.method).then((result) => {
+      this.genProvider.postData(this.userInfo, this.userDetails.method).then((result) => {
         this.responseData = result;
 
 

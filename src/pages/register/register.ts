@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { NavController, ToastController, AlertController } from 'ionic-angular';
 import { TabsPage } from '../tabs/tabs';
-import { AuthServiceProvider } from '../../providers/auth-service/auth-service';
+import { GenericProvider } from '../../providers/generic/generic';
 
 @Component({
   selector: 'page-register',
@@ -17,12 +17,8 @@ export class RegisterPage {
   timer = 180;
   isEmailSent: boolean = false;
 
-  constructor(public navCtrl: NavController, public authService: AuthServiceProvider, public toastCtrl: ToastController, public alertCtrl: AlertController) {
+  constructor(public navCtrl: NavController, public genProvider: GenericProvider, public toastCtrl: ToastController, public alertCtrl: AlertController) {
 
-  }
-
-  ionViewDidLoad() {
-    console.log('ionViewDidLoad RegisterPage');
   }
 
   signup(){
@@ -32,7 +28,7 @@ export class RegisterPage {
       //console.log('Hello.');
       //API connections
       // Process user input, pass it to the API ("signup")
-        this.authService.postData(this.userData, "signup").then((result) => {
+        this.genProvider.postData(this.userData, "signup").then((result) => {
             this.responseData = result;
             console.log( this.responseData );   // see what is coming from the api
             // checks if user already exists
@@ -110,7 +106,7 @@ export class RegisterPage {
           handler: data => {
             console.log('Resend clicked');
 
-            this.authService.postData(this.userData.email, "generateNewValidationCode").then((res) => {
+            this.genProvider.postData(this.userData.email, "generateNewValidationCode").then((res) => {
 
                 // email sent
                 if( res ) {
@@ -133,7 +129,7 @@ export class RegisterPage {
             this.verifyCode.email = this.userData.email;
             //console.log( this.verifyCode.valCode );
             // Process user validation code input, pass it to the API ("signup")
-            this.authService.postData(this.verifyCode, "verifyAccount").then((res) => {
+            this.genProvider.postData(this.verifyCode, "verifyAccount").then((res) => {
                 this.verificationResponse = res;
 
                 // User successfuly validated

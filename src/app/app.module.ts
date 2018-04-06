@@ -1,9 +1,11 @@
 import { NgModule, ErrorHandler } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
+import { IonicApp, IonicModule, IonicErrorHandler, IonicPageModule } from 'ionic-angular';
 import { MyApp } from './app.component';
 
 import { ChatPage } from '../pages/chat/chat';
+import { ChatGenSettingsPage } from '../pages/chat-gen-settings/chat-gen-settings';
+import { ChatNewFormPage } from '../pages/chat-new-form/chat-new-form';
 import { InstantMessagingPage } from '../pages/chat-m/chat-m';
 import { CalendarPage } from '../pages/calendar/calendar';
 import { ForumPage } from '../pages/forum/forum';
@@ -16,9 +18,18 @@ import { TabsPage } from '../pages/tabs/tabs';
 
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
-import { AuthServiceProvider } from '../providers/auth-service/auth-service';
+import { GenericProvider } from '../providers/generic/generic';
 import { HttpModule } from '@angular/http';
+import { NgCalendarModule } from 'ionic2-calendar';
 import { ContentDrawer } from '../components/content-drawer/content-drawer';
+
+// TingTing
+import { NewtopicPage } from '../pages/newtopic/newtopic';
+import { ForumService } from '../providers/forum-service/forum-service';
+import { ItemDetailPage } from '../pages/item-detail/item-detail';
+//import { NewreplypostPage} from '../pages/newreplypost/newreplypost';
+import { PostService} from '../providers/post-service/post-service';
+
 
 @NgModule({
   declarations: [
@@ -28,16 +39,23 @@ import { ContentDrawer } from '../components/content-drawer/content-drawer';
     AccountUpdateDataPage,
     AccountUpdatePasswordPage,
     ChatPage,
+    ChatGenSettingsPage,
+    ChatNewFormPage,
     InstantMessagingPage,
     CalendarPage,
     ForumPage,
     RegisterPage,
     TabsPage,
-    ContentDrawer
+    ContentDrawer,
+    NewtopicPage,
+    ItemDetailPage
   ],
   imports: [
     BrowserModule, HttpModule,
+    NgCalendarModule,
     IonicModule.forRoot(MyApp),
+    IonicPageModule.forChild(ChatGenSettingsPage),
+    IonicPageModule.forChild(ChatNewFormPage)
   ],
   bootstrap: [IonicApp],
   entryComponents: [
@@ -47,17 +65,23 @@ import { ContentDrawer } from '../components/content-drawer/content-drawer';
     AccountUpdateDataPage,
     AccountUpdatePasswordPage,
     ChatPage,
+    //ChatGenSettingsPage,
+    //ChatNewFormPage,
     InstantMessagingPage,
     CalendarPage,
     ForumPage,
     RegisterPage,
-    TabsPage
+    TabsPage,
+    NewtopicPage,
+    ItemDetailPage
   ],
   providers: [
     StatusBar,
     SplashScreen,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
-    AuthServiceProvider
+    GenericProvider,
+    ForumService,
+    PostService
   ]
 })
 export class AppModule {}

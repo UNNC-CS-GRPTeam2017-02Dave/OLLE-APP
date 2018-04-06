@@ -3,7 +3,7 @@ import { NavController, ToastController, AlertController } from 'ionic-angular';
 //import { ForumPage } from '../forum/forum';
 import { TabsPage } from '../tabs/tabs';
 import { RegisterPage } from '../register/register';
-import { AuthServiceProvider } from '../../providers/auth-service/auth-service'
+import { GenericProvider } from '../../providers/generic/generic'
 
 @Component({
   selector: 'page-login',
@@ -13,7 +13,7 @@ export class LoginPage {
   responseData : any;
   userData = {"username":"", "password":""};
 
-  constructor(public navCtrl: NavController, public authService: AuthServiceProvider, public toastCtrl: ToastController, public alertCtrl: AlertController){
+  constructor(public navCtrl: NavController, public genProvider: GenericProvider, public toastCtrl: ToastController, public alertCtrl: AlertController){
 
     // Open TabsPage if a user is already signed-in
     //localStorage.clear();
@@ -30,7 +30,7 @@ export class LoginPage {
   login(){
     if(this.userData.username && this.userData.password){  // fields are not empty
       //API connections
-      this.authService.postData(this.userData, "login").then((result) => {
+      this.genProvider.postData(this.userData, "login").then((result) => {
         this.responseData = result;
         // see what is coming from the api
         console.log( this.responseData );

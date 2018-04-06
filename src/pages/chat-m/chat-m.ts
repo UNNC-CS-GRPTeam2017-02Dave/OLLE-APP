@@ -1,6 +1,6 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import { NavController, NavParams, Content } from 'ionic-angular';
-import { AuthServiceProvider } from '../../providers/auth-service/auth-service';
+import { GenericProvider } from '../../providers/generic/generic';
 
 @Component({
   selector: 'page-chat-m',
@@ -12,29 +12,45 @@ export class InstantMessagingPage {
   @ViewChild('footer') footer: any;
 
   item: any;
-  messages: any[];
+  messages: any[] = null;
   newMessages: any[];
   messageInfo: any;
-  message: string ="";
+  message: string;
   responseData: any;
-  postOldMessageData = {"chat_id":"", "message_id":"", "time":"" };
+  // getFirstBatchMessages
+
+  postOldMessageData = {"chat_id":"",  "time":"", "user_id":"", "token":"" };
+  // getBatchMessages
+  postOldDisMessData = {"chat_id":"", "message_id":"", "time":"" };
+  //askRequest
   postNewMessageData = {"chat_id":"", "message_id":"", "time":"" };
-  postUserMessage    = {"chat_id":"", "user_id":"", "message":"" };
+  // storeMessage
+  postUserMessage    = {"chat_id":"", "user_id":"", "message":"",  "token":"" };
   supp: any;
   drawerOptions: any;
   displayOnLoad: boolean = false;
+  dataStored: any;
 
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public authService: AuthServiceProvider, public elRef:ElementRef) {
-      const data = JSON.parse(localStorage.getItem('userData'));
+  constructor(public navCtrl: NavController, public navParams: NavParams, public genProvider: GenericProvider, public elRef:ElementRef) {
+      this.dataStored = JSON.parse(localStorage.getItem('userData'));
 
       this.item = navParams.get('item');
 
       this.postUserMessage.user_id    = navParams.get('user_id');
       this.postUserMessage.chat_id    = this.item.chat_id;
+      this.postUserMessage.token      = this.dataStored.userData.token;
+
       this.postNewMessageData.chat_id = this.item.chat_id;
+
+      this.postOldDisMessData.chat_id = this.item.chat_id;
+
+
       this.postOldMessageData.chat_id = this.item.chat_id;
-      this.supp = data.userData.username;
+      this.postOldMessageData.user_id = this.postUserMessage.user_id;
+      this.postOldMessageData.token   = this.dataStored.userData.token;
+
+      this.supp = this.dataStored.userData.username;
 
       this.getFirstBatchMessages();
       this.getNewMessages();
@@ -65,9 +81,35 @@ export class InstantMessagingPage {
     this.displayOnLoad = true;
   }
 
+  /* Used to change data once after initial load and every user opens current page. */
+  ionViewWillEnter() {
+    // Executed only if the page has been loaded (messages exist)
+    if( this.messages ) {
+
+      let oldUsername = this.dataStored.userData.username;
+      this.dataStored = JSON.parse(localStorage.getItem('userData'));
+      console.log(this.dataStored);
+
+      // User has changed username
+      if( oldUsername !== this.dataStored.userData.username ){
+
+        this.supp = this.dataStored.userData.username;
+
+        for( let i=0; i<this.messages.length; i++){
+
+            // find message who belonging to current user.
+            if( this.messages[i].user_id == this.dataStored.userData.user_id ){
+                // change name ()
+                this.messages[i].username = this.dataStored.userData.username;
+            }
+        }
+      }
+    }
+  }
+
   getFirstBatchMessages() {
     // no need to send this.postNewMessageData
-    this.authService.postData(this.postOldMessageData, "getFirstBatchMessages").then((result) => {
+    this.genProvider.postData(this.postOldMessageData, "getFirstBatchMessages").then((result) => {
 
         this.responseData = result;
         // store array of messages
@@ -75,13 +117,12 @@ export class InstantMessagingPage {
             this.messages = this.responseData.fData;
 
             // Get oldest displayed message details
-            this.postOldMessageData.message_id = this.messages[0].message_id;
-            this.postOldMessageData.time = this.messages[0].time_sent;
+            this.postOldDisMessData.message_id = this.messages[0].message_id;
+            this.postOldDisMessData.time = this.messages[0].time_sent;
 
-            // Get most recent message Details
+            // Get most recent message Details // - used in askRequest()
             this.postNewMessageData.message_id = this.messages[this.messages.length-1].message_id;
             this.postNewMessageData.time = this.messages[this.messages.length-1].time_sent;
-            //console.log(this.postOldMessageData);
         }
 
         // scroll to bottom message. Timeout required, otherwise messages are not processed appropriately , resulting in 'scrollHeight == contentHeight', see word document and do drawing.
@@ -94,26 +135,31 @@ export class InstantMessagingPage {
   }
 
   getNewMessages() {
-    setInterval(() => this.askRequest(), /*10000*/250);
+    setInterval(() => this.askRequest(), /*10000*/350);
   }
 
   askRequest() {
-    this.authService.postData(this.postNewMessageData, "getNewMessages").then((result) => {
+    this.genProvider.postData(this.postNewMessageData, "getNewMessages").then((result) => {
         //console.log(result.fData[1]);
         this.responseData = result;
 
         // there are new messages
         if( this.responseData.fData[0] != null ) {
 
-            for( let i = 0; i<this.responseData.fData.length; i++){
-              // add them to the array
-              this.messages.push(this.responseData.fData[i]);
-            }
+            // if there are no messages in the chat.
+            if( !this.messages ) {
+                this.messages = this.responseData.fData;
 
+            } else {
+                // case where messages already exist.
+                for( let i = 0; i<this.responseData.fData.length; i++){
+                  // add them to the array
+                  this.messages.push(this.responseData.fData[i]);
+                }
+            }
             // get new messageID and time_sent
             this.postNewMessageData.message_id = this.messages[this.messages.length-1].message_id;
             this.postNewMessageData.time = this.messages[this.messages.length-1].time_sent;
-            //console.log(this.messages);
 
             // go to bottom message
             this.scrollToBottom();
@@ -125,17 +171,23 @@ export class InstantMessagingPage {
   }
 
   sendMessage() {
-    this.postUserMessage.message = this.message;
-    console.log(this.postUserMessage);
-    this.authService.postData(this.postUserMessage, "storeMessage").then((result) => {
-        //this.messages = this.responseData.fData;
-    }, (err) => {
-        //DB Connection failed message
-        console.log("Cannot send message");
-    });
+    if( this.message ) {
+      this.postUserMessage.message = this.message;
+      console.log(this.postUserMessage);
+      this.genProvider.postData(this.postUserMessage, "storeMessage").then((result) => {
+          //this.messages = this.responseData.fData;
+      }, (err) => {
+          //DB Connection failed message
+          console.log("Cannot send message");
+      });
 
-    this.message ="";
-    this.scrollToBottom();
+      this.message ="";
+      this.scrollToBottom();
+    }
+    else
+    {
+      console.log("No message typed.");
+    }
   }
 
   scrollToBottom() {
@@ -157,15 +209,15 @@ export class InstantMessagingPage {
     console.log('Begin async operation');
 
     setTimeout(() => {
-      this.authService.postData(this.postOldMessageData, "getBatchMessages").then((result) => {
+      this.genProvider.postData(this.postOldDisMessData, "getBatchMessages").then((result) => {
 
           this.responseData = result;
           // store array of messages
           this.messages = this.responseData.fData.concat(this.messages);
 
           // Get oldest displayed message details
-          this.postOldMessageData.message_id = this.messages[0].message_id;
-          this.postOldMessageData.time = this.messages[0].time_sent;
+          this.postOldDisMessData.message_id = this.messages[0].message_id;
+          this.postOldDisMessData.time = this.messages[0].time_sent;
 
       }, (err) => {
           //DB Connection failed message
@@ -173,7 +225,7 @@ export class InstantMessagingPage {
       });
       console.log('Async operation has ended');
       infiniteScroll.complete();
-    }, 500);
+    }, 400);
   }
 
 }

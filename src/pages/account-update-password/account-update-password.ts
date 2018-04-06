@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { NavController, NavParams, ToastController } from 'ionic-angular';
-import { AuthServiceProvider } from '../../providers/auth-service/auth-service';
+import { GenericProvider } from '../../providers/generic/generic';
 
 @Component({
   selector: 'page-account-update-password',
@@ -12,7 +12,7 @@ export class AccountUpdatePasswordPage {
   confirmPass: string;
   responseData:any;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public toastCtrl: ToastController, public authService: AuthServiceProvider) {
+  constructor(public navCtrl: NavController, public navParams: NavParams, public toastCtrl: ToastController, public genProvider: GenericProvider) {
       this.userDetails.user_id = navParams.get('user_id');
   }
 
@@ -22,7 +22,7 @@ export class AccountUpdatePasswordPage {
           // new password matches in both input fields
           if( this.userDetails.newPass === this.confirmPass ){
 
-              this.authService.postData(this.userDetails, "updatePassword").then((result) => {
+              this.genProvider.postData(this.userDetails, "updatePassword").then((result) => {
                   this.responseData = result;
 
                   if( this.responseData.updateSuccess ) {
