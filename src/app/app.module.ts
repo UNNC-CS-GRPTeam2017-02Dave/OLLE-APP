@@ -26,10 +26,9 @@ import { ContentDrawer } from '../components/content-drawer/content-drawer';
 
 // TingTing
 import { ForumNewtopicPage } from '../pages/forum-newtopic/forum-newtopic';
-import { ForumService } from '../providers/forum-service/forum-service';
 import { ForumItemDetailPage } from '../pages/forum-item-detail/forum-item-detail';
 import { ForumReplyPage} from '../pages/forum-reply-modal/forum-reply-modal';
-import { PostService} from '../providers/post-service/post-service';
+
 
 
 @NgModule({
@@ -84,9 +83,7 @@ import { PostService} from '../providers/post-service/post-service';
     StatusBar,
     SplashScreen,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
-    GenericProvider,
-    ForumService,
-    PostService
+    GenericProvider
   ]
 })
 export class AppModule {}

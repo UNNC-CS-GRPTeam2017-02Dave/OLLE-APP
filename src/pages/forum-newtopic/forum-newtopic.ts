@@ -3,7 +3,6 @@ import { NavController, NavParams, App, ToastController } from 'ionic-angular';
 import { GenericProvider } from '../../providers/generic/generic';
 import { TabsPage } from '../tabs/tabs';
 
-@IonicPage()
 @Component({
   selector: 'page-forum-newtopic',
   templateUrl: 'forum-newtopic.html'

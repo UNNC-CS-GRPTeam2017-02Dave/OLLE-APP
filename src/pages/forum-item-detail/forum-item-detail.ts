@@ -1,10 +1,9 @@
 import { Component} from '@angular/core';
-import { IonicPage, ModalController, NavController, NavParams } from 'ionic-angular';
+import { ModalController, NavController, NavParams } from 'ionic-angular';
 import { ForumReplyPage} from '../forum-reply-modal/forum-reply-modal';
 import { GenericProvider } from '../../providers/generic/generic';
 
 
-@IonicPage()
 @Component({
   selector: 'page-forum-item-detail',
   templateUrl: 'forum-item-detail.html',

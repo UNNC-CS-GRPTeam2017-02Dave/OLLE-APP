@@ -52,20 +52,6 @@ export class CalendarCreateEventPage {
         }, (err) => {
 
         });
-
-        /*if( this.string === "Modify"){
-          this.genProvider.postData(sup, "storeCalendarEvent").then((res) => {
-            this.responseData = res;
-            console.log(this.responseData)
-
-          }, (err) => {
-
-          });
-        }
-        else{
-
-        }*/
-
         this.viewCtrl.dismiss(this.event);
 
     } else {

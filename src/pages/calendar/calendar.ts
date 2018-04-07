@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { NavController, ModalController, AlertController, ToastController } from 'ionic-angular';
 import { GenericProvider } from '../../providers/generic/generic';
+import { CalendarCreateEventPage } from '../calendar-create-event/calendar-create-event';
 import * as moment from 'moment';
 
 
@@ -81,7 +82,7 @@ export class CalendarPage {
 
   /* Generates the page to addEvent(), retrieves info from 'data' variable */
   addEvent() {
-  	let modal = this.modalCtrl.create('EventModalPage',{
+  	let modal = this.modalCtrl.create(CalendarCreateEventPage, {
       selectedDay:this.selectedDay,
       string: "Add Event"
     });
@@ -172,7 +173,7 @@ export class CalendarPage {
             {
                 text: 'Edit',
                 handler: () => {
-                  let modal = this.modalCtrl.create('EventModalPage',{
+                  let modal = this.modalCtrl.create(CalendarCreateEventPage,{
                     selectedDay:this.selectedDay,
                     event_id: event.event_id,
                     string: "Modify"
@@ -205,8 +206,8 @@ export class CalendarPage {
         ]
       });
 
-    } else{
-
+    } else {
+      console.log("print");
       let alert = this.alertCtrl.create({
       	title:''+event.title,
       	subTitle:''+event.description +'<br><br>From:'+start+'<br>To:' + end,
