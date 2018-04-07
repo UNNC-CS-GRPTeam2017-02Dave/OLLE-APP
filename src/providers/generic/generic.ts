@@ -26,4 +26,8 @@ export class GenericProvider {
     });
   }
 
+  getTopics(){
+      let headers = new Headers();
+      return this.http.get(apiUrl + 'getTopics', { headers: headers }).map(res => res.json());
+  }
 }

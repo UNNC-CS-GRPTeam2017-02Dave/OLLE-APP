@@ -214,7 +214,7 @@ export class CalendarPage {
       });
 
     }
-    alert.present()
+    alert.present();
    }
 
  presentToast(message) {

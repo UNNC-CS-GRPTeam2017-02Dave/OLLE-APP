@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { Http } from '@angular/http';
-import { NavController, App, LoadingController } from 'ionic-angular';
-import { ForumService } from '../../providers/forum-service/forum-service';
-import { NewtopicPage} from '../newtopic/newtopic';
-import { ItemDetailPage} from '../item-detail/item-detail';
+import { NavController, App } from 'ionic-angular';
+import { GenericProvider } from '../../providers/generic/generic';
+import { NewtopicPage} from '../forum-newtopic/forum-newtopic';
+import { ForumItemDetailPage} from '../forum-item-detail/forum-item-detail';
 import 'rxjs/add/operator/map';
 
 @Component({
@@ -12,72 +12,80 @@ import 'rxjs/add/operator/map';
 })
 export class ForumPage {
 
-	private topicsresponse: any;
 	items: any;
-	user_Data: any;
+	responseData:any;
+	userPostData = {"user_id":"", "token":""};
+ 	storage: any;
+ 	isAdmin: boolean = false;
+ 	isMaster: boolean = false;
 
 
-	constructor(public http:Http, public navCtrl: NavController, public app:App, private loadingCtrl: LoadingController, public ForumService: ForumService) {
-
-		let loadingPopup = this.loadingCtrl.create({
-			content: 'Loading posts...'
-		});
-
-		this.ForumService.getTopics().subscribe(response => {
-
-			this.topicsresponse = response;
-
-			this.initializeItems();
-			loadingPopup.dismiss();
-
-		});
+	constructor(public http:Http, public navCtrl: NavController, public app:App, public GenericProvider: GenericProvider) {
 
 	}
 
 	ngOnInit(){
+		this.storage = JSON.parse(localStorage.getItem('userData')).userData;
+    	console.log(this.storage);
 
-		this.ForumService.getTopics().subscribe(response => {
-			this.items = response.TopicsData;
+    	this.userPostData.user_id = this.storage.user_id;
+    	this.userPostData.token  = this.storage.token;
+
+		this.GenericProvider.getTopics().subscribe(response => {
+			this.responseData = response;
+			this.items = this.responseData.TopicsData;
 		});
 
-		this.user_Data = JSON.parse(localStorage.getItem('userData')).userData;
-
+		this.getAdmin();
 	}
 
-	initializeItems() {
-		this.items = this.topicsresponse.TopicsData;
-
-	}
 	/*
-	getItems(ev: any) {
-		// Reset items back to all of the items
-		this.initializeItems();
-		// set val to the value of the searchbar
-		let val = ev.target.value;
-		// if the value is an empty string don't filter the items
-		if (val && val.trim() != '') {
-			this.items = this.items.filter((item) => {
-			return (item.topic_title.toLowerCase().indexOf(val.toLowerCase()) > -1);
-		})
-		}
+	initializeItems() {
+		this.items = this.responseData.TopicsData;
 	}
 	*/
 	viewItemDetail(item){
 
-		this.navCtrl.push(ItemDetailPage, {
+		this.navCtrl.push(ForumItemDetailPage, {
 			item: item
 		});
-
 	}
+
 	goToNewTopicPage(){
 		this.navCtrl.push(NewtopicPage);
 	}
 
-	validate_status(){
+	getAdmin(){
 
-		if(this.user_Data.username == "Jacobo")
-			return true;
-		else
-			return false;
+    this.GenericProvider.postData(this.userPostData, "isAdminUser").then((res) => {
+    	 this.responseData = res;
+
+      	// isAdmin
+      	if( this.responseData.true ) {
+      		 this.isAdmin = true;
+
+      	} else if ( this.responseData.isMaster ) {
+      		this.isMaster = true;
+
+      	}
+
+    }, (err) => {
+
+		});
+  }
+
+	removeTopic(item){
+		this.GenericProvider.postData(item.topic_id, "removeTopic").then((result) => {
+      		this.responseData = result;
+      		this.items.splice(this.items.indexOf(item), 1);
+    	}, (err) => {
+      		//error message
+    	});
+	}
+
+	editTopic(item){
+		this.navCtrl.push(NewtopicPage, {
+			item: item
+		});
 	}
 }

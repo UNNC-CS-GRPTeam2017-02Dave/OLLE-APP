@@ -8,6 +8,7 @@ import { ChatGenSettingsPage } from '../pages/chat-gen-settings/chat-gen-setting
 import { ChatNewFormPage } from '../pages/chat-new-form/chat-new-form';
 import { InstantMessagingPage } from '../pages/chat-m/chat-m';
 import { CalendarPage } from '../pages/calendar/calendar';
+import { CalendarCreateEventPage } from '../pages/calendar-create-event/calendar-create-event';
 import { ForumPage } from '../pages/forum/forum';
 import { AccountPage } from '../pages/account/account';
 import { AccountUpdateDataPage } from '../pages/account-update-data/account-update-data';
@@ -24,10 +25,10 @@ import { NgCalendarModule } from 'ionic2-calendar';
 import { ContentDrawer } from '../components/content-drawer/content-drawer';
 
 // TingTing
-import { NewtopicPage } from '../pages/newtopic/newtopic';
+import { ForumNewtopicPage } from '../pages/forum-newtopic/forum-newtopic';
 import { ForumService } from '../providers/forum-service/forum-service';
-import { ItemDetailPage } from '../pages/item-detail/item-detail';
-//import { NewreplypostPage} from '../pages/newreplypost/newreplypost';
+import { ForumItemDetailPage } from '../pages/forum-item-detail/forum-item-detail';
+import { ForumReplyPage} from '../pages/forum-reply-modal/forum-reply-modal';
 import { PostService} from '../providers/post-service/post-service';
 
 
@@ -43,19 +44,21 @@ import { PostService} from '../providers/post-service/post-service';
     ChatNewFormPage,
     InstantMessagingPage,
     CalendarPage,
+    CalendarCreateEventPage,
     ForumPage,
     RegisterPage,
     TabsPage,
     ContentDrawer,
-    NewtopicPage,
-    ItemDetailPage
+    ForumNewtopicPage,
+    ForumItemDetailPage
   ],
   imports: [
     BrowserModule, HttpModule,
     NgCalendarModule,
     IonicModule.forRoot(MyApp),
     IonicPageModule.forChild(ChatGenSettingsPage),
-    IonicPageModule.forChild(ChatNewFormPage)
+    IonicPageModule.forChild(ChatNewFormPage),
+    IonicPageModule.forChild(CalendarCreateEventPage)
   ],
   bootstrap: [IonicApp],
   entryComponents: [
@@ -72,8 +75,8 @@ import { PostService} from '../providers/post-service/post-service';
     ForumPage,
     RegisterPage,
     TabsPage,
-    NewtopicPage,
-    ItemDetailPage
+    ForumNewtopicPage,
+    ForumItemDetailPage
   ],
   providers: [
     StatusBar,
