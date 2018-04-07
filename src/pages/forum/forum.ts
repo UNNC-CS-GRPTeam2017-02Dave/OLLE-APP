@@ -15,6 +15,7 @@ export class ForumPage {
 	items: any;
 	responseData:any;
 	userPostData = {"user_id":"", "token":""};
+	removeData = {"user_id":"", "token":"", "topic_id":""}
  	storage: any;
  	isAdmin: boolean = false;
  	isMaster: boolean = false;
@@ -26,7 +27,6 @@ export class ForumPage {
 	
 	ngOnInit(){
 		this.storage = JSON.parse(localStorage.getItem('userData')).userData;
-    	console.log(this.storage);
 
     	this.userPostData.user_id = this.storage.user_id;
     	this.userPostData.token  = this.storage.token;
@@ -71,12 +71,16 @@ export class ForumPage {
 
     		}, (err) => {
       
-    		});
+    	});
     }
 
 	removeTopic(item)
-	{		
-		this.GenericProvider.postData(item.topic_id, "removeTopic").then((result) => {
+	{	
+		this.removeData.user_id = this.storage.user_id;
+    	this.removeData.token  = this.storage.token;
+    	this.removeData.topic_id = item.topic_id;
+
+		this.GenericProvider.postData(this.removeData, "removeTopic").then((result) => {
       		this.responseData = result; 
       		this.items.splice(this.items.indexOf(item), 1);   		   
     	}, (err) => {

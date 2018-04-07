@@ -21,7 +21,7 @@ $app->post('/postNewTopicReply','postNewTopicReply');
 $app->post('/getForumReply','getForumReply');
 $app->post('/getPostedReply','getPostedReply');
 $app->post('/removeTopic','removeTopic');
-$app->post('/userTag','userTag');
+//$app->post('/userTag','userTag');
 
 
 $app->get('/getTopics','getTopics');
@@ -115,17 +115,20 @@ function isAdminUser(){
   }
 }
 
+/*
 function userTag(){
 	$request = \Slim\Slim::getInstance()->request();
     $data = json_decode($request->getBody());
 
-    try {
+   	if( isValidUser($data->user_id, $data->token) ){ 
+
+    	try {
       
           $db = getDB();
           $sql = "SELECT * FROM users WHERE user_id=:user_id";
 
           $stmt = $db->prepare($sql);
-          $stmt->bindParam("user_id", $data, PDO::PARAM_INT);
+          $stmt->bindParam("user_id", $data->user_id, PDO::PARAM_INT);
           $stmt->execute();
 
           $userTag = $stmt->fetchAll(PDO::FETCH_OBJ);
@@ -138,45 +141,47 @@ function userTag(){
 				echo '{"userTag": ""}';
 			}
      
-  } catch(PDOException $e) {
-      echo '{"error":{"text":'. $e->getMessage() .'}}';
-  }
-
+  		} catch(PDOException $e) {
+      		echo '{"error":{"text":'. $e->getMessage() .'}}';
+  		}
+  	}
 }
-
+*/
 
 function postNewTopicReply(){
 	$request = \Slim\Slim::getInstance()->request();
     $data = json_decode($request->getBody());
+
+    if( isValidUser($data->user_id, $data->token) ){
 	
-	$topic_id = $data->topic_id;
-	$username = $data->username;
-	$tag = $data->tag;
-	$parent_id = $data->parent_id;
+		$topic_id = $data->topic_id;
+		$username = $data->username;
+		$language = $data->language;
+		$parent_id = $data->parent_id;
 
 
-	date_default_timezone_set('PRC'); 
-	$post_date = date("Y-m-d H:i:s");
+		date_default_timezone_set('PRC'); 
+		$post_date = date("Y-m-d H:i:s");
 
-	if(!$parent_id)
-	{
-		$parent_id = 0;
-	}
+		if(!$parent_id)
+		{
+			$parent_id = 0;
+		}
 
-	$user_post=filter_var($data->user_post, FILTER_SANITIZE_STRING);
-	if((strlen($user_post) > 0 and strlen($user_post) < 500))
-	{
-		try {		
+		$user_post=filter_var($data->user_post, FILTER_SANITIZE_STRING);
+		if((strlen($user_post) > 0 and strlen($user_post) < 500))
+		{
+			try {		
 				$db = getDB();       		
-				$sql="INSERT INTO posts(topic_id,username,tag,user_post,parent_id,post_date)
+				$sql="INSERT INTO posts(topic_id,username,language,user_post,parent_id,post_date)
 										VALUES
-										(:topic_id,:username,:tag,:user_post,:parent_id, :post_date)";
+										(:topic_id,:username,:language,:user_post,:parent_id, :post_date)";
 
 				$stmt = $db->prepare($sql);
 		
 				$stmt->bindParam("topic_id", $topic_id,PDO::PARAM_INT);
 				$stmt->bindParam("username", $username,PDO::PARAM_STR);
-				$stmt->bindParam("tag", $tag, PDO::PARAM_STR);
+				$stmt->bindParam("language", $language, PDO::PARAM_STR);
 				$stmt->bindParam("user_post", $user_post,PDO::PARAM_STR);
 				$stmt->bindParam("parent_id", $parent_id,PDO::PARAM_INT);
 				$stmt->bindParam("post_date", $post_date,PDO::PARAM_STR);
@@ -190,8 +195,9 @@ function postNewTopicReply(){
 			catch(PDOException $e) {
 				echo '{"error":{"text":'. $e->getMessage() .'}}';
 			}
-	}else{
-		echo '{"error1":{"text":"Invalid reply."}}';
+		}else{
+			echo '{"error1":{"text":"Invalid reply."}}';
+		}
 	}
 }
 
@@ -199,9 +205,11 @@ function removeTopic(){
 	$request = \Slim\Slim::getInstance()->request();
     $data = json_decode($request->getBody());
 	
-	$topic_id=$data;
+	if( isValidUser($data->user_id, $data->token) ){
 
-	try {		
+		$topic_id=$data->topic_id;
+
+		try {		
 				$db = getDB();       		
 				$sql="DELETE FROM topics WHERE topic_id=:topic_id";
 				$stmt = $db->prepare($sql);		
@@ -216,33 +224,34 @@ function removeTopic(){
 		
 				$db = null;	
 				echo '{"success":"Hello Tingting"}';
-		}
-		catch(PDOException $e) {
+			}
+			catch(PDOException $e) {
 				echo '{"error":{"text":'. $e->getMessage() .'}}';
-		}
-
+			}
+	}
 }
 
 function postNewTopic(){
 	$request = \Slim\Slim::getInstance()->request();
     $data = json_decode($request->getBody());
 	
-	$topic_week=$data->topic_week;
+	if( isValidUser($data->user_id, $data->token) ){
 
+		$topic_week=$data->topic_week;
 
-	if(is_numeric($topic_week))
-	{
-		$topic_title = filter_var($data->topic_title, FILTER_SANITIZE_STRING);
-		if((strlen($topic_title) > 0 and strlen($topic_title) < 300))
+		if(is_numeric($topic_week))
 		{
-			$topic_detail = filter_var($data->topic_detail, FILTER_SANITIZE_STRING);
-			if((strlen($topic_detail) > 0 and strlen($topic_detail) < 500))
+			$topic_title = filter_var($data->topic_title, FILTER_SANITIZE_STRING);
+			if((strlen($topic_title) > 0 and strlen($topic_title) < 300))
 			{
-				$topic_date=$data->topic_date;			
-				$user_id=$data->user_id;			
-				$post_username = filter_var($data->post_username, FILTER_SANITIZE_STRING);
+				$topic_detail = filter_var($data->topic_detail, FILTER_SANITIZE_STRING);
+				if((strlen($topic_detail) > 0 and strlen($topic_detail) < 500))
+				{
+					$topic_date=$data->topic_date;			
+					$user_id=$data->user_id;			
+					$post_username = filter_var($data->post_username, FILTER_SANITIZE_STRING);
 						
-				try {		
+					try {		
 						$db = getDB();
 						$topic_id = $data->topic_id;
 						if($topic_id) 
@@ -276,21 +285,21 @@ function postNewTopic(){
 					catch(PDOException $e) {
 						echo '{"error":{"text":'. $e->getMessage() .'}}';
 					}			
-			}
+				}
+				else
+				{
+					echo '{"error3":{"text":"Invalid detail."}}';
+				}
+			}	
 			else
 			{
-				echo '{"error3":{"text":"Invalid detail."}}';
+				echo '{"error2":{"text":"Invalid title."}}';
 			}
-		}	
+		}
 		else
 		{
-			echo '{"error2":{"text":"Invalid title."}}';
+			echo '{"error1":{"text":"Invalid week number."}}';
 		}
-
-	}
-	else
-	{
-		echo '{"error1":{"text":"Invalid week number."}}';
 	}		
 }
 
@@ -299,9 +308,11 @@ function getForumReply(){
 	$request = \Slim\Slim::getInstance()->request();
     $data = json_decode($request->getBody());
 
-    $topic_id = intval($data);
+    if( isValidUser($data->user_id, $data->token) ){
+
+    	$topic_id = $data->topic_id;
    
-	try {       
+		try {       
             $ForumReplyData = '';
             $db = getDB();
 
@@ -322,19 +333,21 @@ function getForumReply(){
             }else{
 				echo '{"ForumReplyData": ""}';
 			}
-    } catch(PDOException $e) {
-        echo '{"error":{"text":'. $e->getMessage() .'}}';
-    }	
+    	} catch(PDOException $e) {
+        	echo '{"error":{"text":'. $e->getMessage() .'}}';
+    }	}
+
 }
 
 function getPostedReply(){
 	$request = \Slim\Slim::getInstance()->request();
     $data = json_decode($request->getBody());
 
-    $topic_id = $data->topic_id;
-    $parent_id = $data->parent_id;
+    if( isValidUser($data->user_id, $data->token) ){
+    	$topic_id = $data->topic_id;
+    	$parent_id = $data->parent_id;
   
-	try {       
+		try {       
             $PostedReplyData = '';
             $db = getDB();
 
@@ -355,8 +368,9 @@ function getPostedReply(){
             }else{
 				echo '{"PostedReplyData": ""}';
 			}
-    } catch(PDOException $e) {
-        echo '{"error":{"text":'. $e->getMessage() .'}}';
+    	} catch(PDOException $e) {
+        	echo '{"error":{"text":'. $e->getMessage() .'}}';
+    	}
     }	
 }
 
@@ -390,38 +404,6 @@ function getTopics(){
     } catch(PDOException $e) {
         echo '{"error":{"text":'. $e->getMessage() .'}}';
     }	
-}
-
-function get_user_info(){
-
-	$request = \Slim\Slim::getInstance()->request();
-    $data = json_decode($request->getBody());
-   
-    $user_id = intval($data);
-  
-	try {       
-            $userInfo = '';
-            $db = getDB();
-
-            $sql = "SELECT * FROM users WHERE user_id= :user_id";           
-
-            $stmt = $db->prepare($sql); 
-            $stmt->bindParam("user_id", $user_id, PDO::PARAM_INT);
-             
-            $stmt->execute();
-
-            $userInfo = $stmt->fetchAll(PDO::FETCH_OBJ);
-
-            $db = null;
-            
-            if($userInfo){
-				echo '{"userInfo": ' . json_encode($userInfo) . '}';
-            }else{
-				echo '{"userInfo": ""}';
-			}
-    } catch(PDOException $e) {
-        echo '{"error":{"text":'. $e->getMessage() .'}}';
-    }
 }
 
 

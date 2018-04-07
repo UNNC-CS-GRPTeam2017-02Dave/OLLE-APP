@@ -15,12 +15,11 @@ import { TabsPage } from '../tabs/tabs';
   templateUrl: 'forum-newtopic.html'
 })
 export class NewtopicPage {
-	
+	storage:any;
 	item : any;
 	responseData : any;
-	topicData = {"topic_id":"","topic_title": "", "topic_detail": "", "topic_date": "", "topic_week": "", "user_id": "", "post_username" :""};
+	topicData = {"topic_id":"","topic_title": "", "topic_detail": "", "topic_date": "", "topic_week": "", "user_id": "", "post_username" :"", "token": ""};
 	
-	user_info = JSON.parse(localStorage.getItem('userData')).userData;
 	
 	constructor(public navCtrl: NavController, public navParams: NavParams, public app: App, public GenericProvider: GenericProvider, public toastCtrl: ToastController) {
 
@@ -28,9 +27,12 @@ export class NewtopicPage {
     }
   
   	ngOnInit() {
-	  
-    	this.topicData.user_id = this.user_info.user_id;
-      	this.topicData.post_username = this.user_info.username;   
+	  	this.storage = JSON.parse(localStorage.getItem('userData')).userData;
+
+    	
+      	this.topicData.post_username = this.storage.username;       	  
+    	this.topicData.user_id = this.storage.user_id;
+    	this.topicData.token  = this.storage.token;
   	}
   
   
