@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { Http } from '@angular/http';
 import { NavController, App } from 'ionic-angular';
 import { GenericProvider } from '../../providers/generic/generic';
-import { NewtopicPage} from '../forum-newtopic/forum-newtopic';
+import { ForumNewtopicPage} from '../forum-newtopic/forum-newtopic';
 import { ForumItemDetailPage} from '../forum-item-detail/forum-item-detail';
 import 'rxjs/add/operator/map';
 
@@ -34,6 +34,7 @@ export class ForumPage {
 		this.GenericProvider.getTopics().subscribe(response => {
 			this.responseData = response;
 			this.items = this.responseData.TopicsData;
+      console.log("Hello World");
 		});
 
 		this.getAdmin();
@@ -52,7 +53,7 @@ export class ForumPage {
 	}
 
 	goToNewTopicPage(){
-		this.navCtrl.push(NewtopicPage);
+		this.navCtrl.push(ForumNewtopicPage);
 	}
 
 	getAdmin(){

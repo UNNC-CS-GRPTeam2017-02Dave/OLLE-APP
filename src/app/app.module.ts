@@ -50,6 +50,7 @@ import { PostService} from '../providers/post-service/post-service';
     TabsPage,
     ContentDrawer,
     ForumNewtopicPage,
+    ForumReplyPage,
     ForumItemDetailPage
   ],
   imports: [
@@ -76,6 +77,7 @@ import { PostService} from '../providers/post-service/post-service';
     RegisterPage,
     TabsPage,
     ForumNewtopicPage,
+    ForumReplyPage,
     ForumItemDetailPage
   ],
   providers: [

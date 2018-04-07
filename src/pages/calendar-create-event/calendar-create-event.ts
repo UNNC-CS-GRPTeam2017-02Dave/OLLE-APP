@@ -8,7 +8,7 @@ import * as moment from 'moment';
   templateUrl: 'calendar-create-event.html',
 })
 export class CalendarCreateEventPage {
-  event = { startTime: new Date().toISOString(), endTime: new Date().toISOString(), title:"", description:""};
+  event = { startTime: new Date().toISOString(), endTime: new Date().toISOString(), title:"", description:"", event_id:"" };
   minDate = new Date().toISOString();
   event_id: number;
   string: any;

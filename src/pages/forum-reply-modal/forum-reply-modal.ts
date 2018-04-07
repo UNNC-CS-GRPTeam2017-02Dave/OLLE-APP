@@ -11,9 +11,10 @@ import { ForumItemDetailPage } from '../forum-item-detail/forum-item-detail';
 export class ForumReplyPage {
   responseData: any;
   item: any;
+  storage: any;
 
-  postTopicReply = { "post_id":"","user_post": "", "username": "", "tag":"", "topic_id": "", "parent_id": "" };
-  user_data = JSON.parse(localStorage.getItem('userData')).userData;
+  postTopicReply = { "post_id":"","user_post": "", "username": "", "language":"", "topic_id": "", "parent_id": "","user_id":"", "token":"" };
+
 
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public GenericProvider: GenericProvider, public toastCtrl: ToastController,private viewCtrl:ViewController) {
@@ -22,42 +23,36 @@ export class ForumReplyPage {
 
   ngOnInit() {
 
+    this.storage = JSON.parse(localStorage.getItem('userData')).userData;
+
   	this.postTopicReply.topic_id = this.item.topic_id;
-	this.postTopicReply.username = this.user_data.username;
-	this.postTopicReply.parent_id = this.item.parent_id;
-	this.postTopicReply.parent_id = this.item.post_id;
+	  this.postTopicReply.parent_id = this.item.post_id;
 
-	this.GenericProvider.postData(this.user_data.user_id,"userTag").then((result) => {
-
-	 	this.responseData = result;
-
-	 	this.postTopicReply.tag = this.responseData.userTag[0].tag;
-    }, (err) => {
-      		//error message
-    });
-
+    this.postTopicReply.user_id = this.storage.user_id;
+    this.postTopicReply.token  = this.storage.token;
+	  this.postTopicReply.language = this.storage.language;
+	  this.postTopicReply.username = this.storage.username;
   }
 
   postNewTopicReply() {
-
+    console.log(this.postTopicReply.language);
     this.GenericProvider.postData(this.postTopicReply, "postNewTopicReply").then((result) => {
       this.responseData = result;
 
       if(this.responseData.error1)
-	  {
-		this.presentToast("Invalid reply");
-	  }
-	  else
-	  {
-	  	this.viewCtrl.dismiss(this.postTopicReply);
-	  }
+	    {
+		      this.presentToast("Invalid reply");
+	    }
+	    else
+	    {
+	  	    this.viewCtrl.dismiss(this.postTopicReply);
+	    }
     }, (err) => {
       //error message
     });
   }
 
   back(){
-
   	this.viewCtrl.dismiss();
   }
 

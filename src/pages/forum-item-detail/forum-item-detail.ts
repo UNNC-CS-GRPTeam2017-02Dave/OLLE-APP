@@ -9,16 +9,17 @@ import { GenericProvider } from '../../providers/generic/generic';
   selector: 'page-forum-item-detail',
   templateUrl: 'forum-item-detail.html',
 })
-export class ForumItemDetailPage {
+export class ItemDetailPage {
 
-	  item: any;
+	item: any;
   	items: any;
   	responseData: any;
-
+  	storage: any;
   	item1: any;
   	root_reply:any;
   	posted_reply: any;
-  	PostedInfo = {"topic_id": "", "parent_id":""};
+  	PostedInfo = {"topic_id": "", "parent_id":"", "user_id":"", "token":""};
+  	ReplyData = {"user_id":"", "token":"", "topic_id":""};
 
   	constructor(public navCtrl: NavController, public navParams: NavParams, private modalCtrl: ModalController, public GenericProvider:GenericProvider) {
 
@@ -30,7 +31,7 @@ export class ForumItemDetailPage {
     	let modal = this.modalCtrl.create(ForumReplyPage, {item:item});
 
   		modal.onDidDismiss(data => {
-	  		this.GenericProvider.postData(this.item.topic_id, "getForumReply").then((result) => {
+	  		this.GenericProvider.postData(this.ReplyData, "getForumReply").then((result) => {
 
 	 			this.responseData = result;
 	 			this.items = this.responseData.ForumReplyData;
@@ -49,12 +50,21 @@ export class ForumItemDetailPage {
 
   	ngOnInit() {
 
-    	this.GenericProvider.postData(this.item.topic_id, "getForumReply").then((result) => {
+  		this.storage = JSON.parse(localStorage.getItem('userData')).userData;
+
+    	this.PostedInfo.user_id = this.storage.user_id;
+    	this.PostedInfo.token  = this.storage.token;
+
+    	this.ReplyData.user_id = this.storage.user_id;
+    	this.ReplyData.token  = this.storage.token;
+    	this.ReplyData.topic_id  = this.item.topic_id;
+
+    	this.GenericProvider.postData(this.ReplyData, "getForumReply").then((result) => {
 
 	 		this.responseData = result;
 	 		this.items = this.responseData.ForumReplyData;
 	 		this.root_reply = this.items;
-	 		console.log(this.items);
+
     	}, (err) => {
       		//error message
     	});
@@ -65,7 +75,6 @@ export class ForumItemDetailPage {
   		this.PostedInfo.parent_id = parent.post_id;
 
   		this.GenericProvider.postData(this.PostedInfo, "getPostedReply").then((result) => {
- 			console.log(result);
 	 		this.responseData = result;
 	 		this.posted_reply = this.responseData.PostedReplyData;
     	}, (err) => {
@@ -74,7 +83,7 @@ export class ForumItemDetailPage {
   	}
 
 
-    view_comments(child, parent){
+    view_comments(child, parent){					
   		if(child.parent_id == parent.post_id)
   			return true;
   		else
@@ -93,7 +102,7 @@ export class ForumItemDetailPage {
   			if (val && val.trim() != '') {
 
       			this.items = this.items.filter((item) => {
-        			return (item.tag.toLowerCase().indexOf(val.toLowerCase()) > -1);
+        			return (item.language.toLowerCase().indexOf(val.toLowerCase()) > -1);
       			})
     		}
   		}

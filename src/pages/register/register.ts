@@ -10,7 +10,7 @@ import { GenericProvider } from '../../providers/generic/generic';
 export class RegisterPage {
   responseData : any;
   verificationResponse: any;
-  userData = {"user_id":"", "name":"", "surname":"", "username":"", "email":"","password":"" };
+  userData = {"user_id":"", "name":"", "surname":"", "username":"", "language":"", "email":"","password":"" };
   verifyCode = {"valCode":"", "email":"", "name":""};
   alertTitle: string;
   alertMessage: string;
@@ -24,7 +24,7 @@ export class RegisterPage {
   signup(){
 
     // Check if user Inputfields filled.
-    if(this.userData.name && this.userData.surname && this.userData.username && this.userData.email && this.userData.password){
+    if(this.userData.name && this.userData.surname && this.userData.username && this.userData.email && this.userData.password && this.userData.language ){
       //console.log('Hello.');
       //API connections
       // Process user input, pass it to the API ("signup")

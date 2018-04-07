@@ -22,6 +22,20 @@
   </ion-item>
 
   <ion-item>
+    <!-- <ion-input type="email" placeholder="Language to Learn" clearInput [(ngModel)]="userData.language"></ion-input> -->
+    <ion-label>Language</ion-label>
+    <ion-select interface="popover" [(ngModel)]="userData.language">
+      <ion-option value="spanish">SPANISH</ion-option>
+      <ion-option value="french">FRENCH</ion-option>
+      <ion-option value="japanese">JAPANESE</ion-option>
+      <ion-option value="italian">ITALIAN</ion-option>
+      <ion-option value="korean">KOREAN</ion-option>
+      <ion-option value="english">ENGLISH</ion-option>
+      <ion-option value="mandarin">MANDARIN</ion-option>
+    </ion-select>
+  </ion-item>
+
+  <ion-item>
     <ion-input type="email" placeholder="Email" clearInput [(ngModel)]="userData.email"></ion-input>
   </ion-item>
 
