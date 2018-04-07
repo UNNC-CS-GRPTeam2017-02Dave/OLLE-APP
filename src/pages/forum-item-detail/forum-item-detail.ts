@@ -9,9 +9,9 @@ import { GenericProvider } from '../../providers/generic/generic';
   selector: 'page-forum-item-detail',
   templateUrl: 'forum-item-detail.html',
 })
-export class ItemDetailPage {
+export class ForumItemDetailPage {
 
-	item: any;
+	  item: any;
   	items: any;
   	responseData: any;
   	storage: any;
@@ -83,7 +83,7 @@ export class ItemDetailPage {
   	}
 
 
-    view_comments(child, parent){					
+    view_comments(child, parent){
   		if(child.parent_id == parent.post_id)
   			return true;
   		else

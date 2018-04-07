@@ -85,7 +85,7 @@ export class ForumPage {
 	}
 
 	editTopic(item){
-		this.navCtrl.push(NewtopicPage, {
+		this.navCtrl.push(ForumNewtopicPage, {
 			item: item
 		});
 	}

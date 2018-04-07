@@ -10,7 +10,7 @@ import * as moment from 'moment';
 export class CalendarCreateEventPage {
   event = { startTime: new Date().toISOString(), endTime: new Date().toISOString(), title:"", description:"", event_id:"" };
   minDate = new Date().toISOString();
-  event_id: number;
+  event_id: any;
   string: any;
   responseData: any;
 
