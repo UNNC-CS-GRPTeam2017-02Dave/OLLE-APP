@@ -28,7 +28,7 @@ import { ContentDrawer } from '../components/content-drawer/content-drawer';
 import { ForumNewtopicPage } from '../pages/forum-newtopic/forum-newtopic';
 import { ForumItemDetailPage } from '../pages/forum-item-detail/forum-item-detail';
 import { ForumReplyPage} from '../pages/forum-reply-modal/forum-reply-modal';
-
+import { ForumTopicSettingsPage} from '../pages/forum-topic-settings/forum-topic-settings';
 
 
 @NgModule({
@@ -50,7 +50,8 @@ import { ForumReplyPage} from '../pages/forum-reply-modal/forum-reply-modal';
     ContentDrawer,
     ForumNewtopicPage,
     ForumReplyPage,
-    ForumItemDetailPage
+    ForumItemDetailPage,
+    ForumTopicSettingsPage
   ],
   imports: [
     BrowserModule, HttpModule,
@@ -77,7 +78,8 @@ import { ForumReplyPage} from '../pages/forum-reply-modal/forum-reply-modal';
     TabsPage,
     ForumNewtopicPage,
     ForumReplyPage,
-    ForumItemDetailPage
+    ForumItemDetailPage,
+    ForumTopicSettingsPage
   ],
   providers: [
     StatusBar,

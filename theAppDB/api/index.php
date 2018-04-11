@@ -45,7 +45,9 @@ $app->post('/postNewTopicReply','postNewTopicReply');
 $app->post('/getForumReply','getForumReply');
 $app->post('/removeTopic','removeTopic');
 $app->post('/getPostedReply','getPostedReply');
+$app->post('/updateTopic','updateTopic');
 $app->get('/getTopics','getTopics');
+
 
 $app->run();
 
@@ -762,62 +764,151 @@ function removeOutdatedCalendarEvents(){
 
 function postNewTopic(){
 	$request = \Slim\Slim::getInstance()->request();
-	$data = json_decode($request->getBody());
+    $data = json_decode($request->getBody());
+	
+	if( isValidUser($data->user_id, $data->token) ){
 
-	$topic_week=$data->topic_week;
+		$topic_week=$data->topic_week;
 
-	if(is_numeric($topic_week))
-	{
-    	$topic_title = filter_var($data->topic_title, FILTER_SANITIZE_STRING);
-    	if((strlen($topic_title) > 0 and strlen($topic_title) < 300))
-    	{
-        	$topic_detail = filter_var($data->topic_detail, FILTER_SANITIZE_STRING);
-        	if((strlen($topic_detail) > 0 and strlen($topic_detail) < 500))
-        	{
-            	$topic_date=$data->topic_date;
-            	$user_id=$data->user_id;
-            	$post_username = filter_var($data->post_username, FILTER_SANITIZE_STRING);
+		if(is_numeric($topic_week))
+		{
+			$topic_title = filter_var($data->topic_title, FILTER_SANITIZE_STRING);
+			if((strlen($topic_title) > 0 and strlen($topic_title) < 300))
+			{
+				$topic_detail = filter_var($data->topic_detail, FILTER_SANITIZE_STRING);
+				if((strlen($topic_detail) > 0 and strlen($topic_detail) < 500))
+				{
+					$topic_date=$data->topic_date;			
+					$user_id=$data->user_id;			
+					$post_username = filter_var($data->post_username, FILTER_SANITIZE_STRING);
+						
+					try {		
+						$db = getDB();
+						$topic_id = $data->topic_id;
+						if($topic_id) 
+						{
+							$sql="UPDATE topics SET topic_title=:topic_title, topic_detail=:topic_detail, topic_date=:topic_date, topic_week=:topic_week, post_username=:post_username,user_id=:user_id WHERE topic_id = :topic_id";
+							$stmt = $db->prepare($sql);
+							$stmt->bindParam("topic_id", $topic_id,PDO::PARAM_INT);	
+						} 
+						else{
+							$sql="INSERT INTO topics(topic_title,topic_detail,topic_date,topic_week,post_username,user_id)
+												VALUES
+												(:topic_title,:topic_detail,:topic_date,:topic_week,:post_username,:user_id)";
+						    $stmt = $db->prepare($sql);
+						}    		
+						
 
-	            try {
-                	$db = getDB();
-                	$sql="INSERT INTO topics(topic_title,topic_detail,topic_date,topic_week,post_username, user_id)
-                	VALUES
-                	(:topic_title,:topic_detail,:topic_date,:topic_week,:post_username,:user_id)";
+								
+						$stmt->bindParam("topic_title", $topic_title,PDO::PARAM_STR);
+						$stmt->bindParam("topic_detail", $topic_detail,PDO::PARAM_STR);
+						$stmt->bindParam("topic_date", $topic_date,PDO::PARAM_STR);
+						$stmt->bindParam("topic_week", $topic_week,PDO::PARAM_INT);
+						$stmt->bindParam("post_username", $post_username,PDO::PARAM_STR);
+						$stmt->bindParam("user_id", $user_id,PDO::PARAM_STR);
+	
+						$stmt->execute();
 
-                	$stmt = $db->prepare($sql);
+						$sql = "SELECT * FROM topics ORDER BY topic_id DESC LIMIT 1";
+      					$stmt = $db->prepare($sql);
+      					$stmt->execute();
+      					// fetchAll gets all elements in the array, while fetch just gets 1
+      					$topicData = $stmt->fetch(PDO::FETCH_OBJ);
+      					$topicData = json_encode($topicData);	
+		
+						$db = null;
+		
+						echo '{"topicData":' .$topicData.'}';
+					}
+					catch(PDOException $e) {
+						echo '{"error":{"text":'. $e->getMessage() .'}}';
+					}			
+				}
+				else
+				{
+					echo '{"error3":{"text":"Invalid detail."}}';
+				}
+			}	
+			else
+			{
+				echo '{"error2":{"text":"Invalid title."}}';
+			}
+		}
+		else
+		{
+			echo '{"error1":{"text":"Invalid week number."}}';
+		}
+	}		
+}
 
-                	$stmt->bindParam("topic_title", $topic_title,PDO::PARAM_STR);
-                	$stmt->bindParam("topic_detail", $topic_detail,PDO::PARAM_STR);
-                	$stmt->bindParam("topic_date", $topic_date,PDO::PARAM_STR);
-                	$stmt->bindParam("topic_week", $topic_week,PDO::PARAM_INT);
-                	$stmt->bindParam("post_username", $post_username,PDO::PARAM_STR);
-                	$stmt->bindParam("user_id", $user_id,PDO::PARAM_STR);
 
-                	$stmt->execute();
+function updateTopic(){
+	$request = \Slim\Slim::getInstance()->request();
+    $data = json_decode($request->getBody());
+	
+	if( isValidUser($data->user_id, $data->token) ){
 
-                	$db = null;
+		$topic_week=$data->topic_week;
 
-                	echo '{"success":"Hello Tingting"}';
-	            }
-          	  catch(PDOException $e) {
-            	     echo '{"error":{"text":'. $e->getMessage() .'}}';
-              }
-        	}
-        	else
-        	{
-        	   echo '{"error3":{"text":"Invalid detail."}}';
-        	}
-    	}
-    	else
-    	{
-    	   echo '{"error2":{"text":"Invalid title."}}';
-    	}
-  	}
-  	else
-  	{
-  	   echo '{"error1":{"text":"Invalid week number."}}';
-  	}
-	}
+		if(is_numeric($topic_week))
+		{
+			$topic_title = filter_var($data->topic_title, FILTER_SANITIZE_STRING);
+			if((strlen($topic_title) > 0 and strlen($topic_title) < 300))
+			{
+				$topic_detail = filter_var($data->topic_detail, FILTER_SANITIZE_STRING);
+				if((strlen($topic_detail) > 0 and strlen($topic_detail) < 500))
+				{
+					$topic_date=$data->topic_date;			
+					$user_id=$data->user_id;			
+					$post_username = filter_var($data->post_username, FILTER_SANITIZE_STRING);
+						
+					try {		
+							$db = getDB();
+							$topic_id = $data->topic_id;
+						
+							$sql="UPDATE topics SET topic_title=:topic_title, topic_detail=:topic_detail, topic_date=:topic_date, topic_week=:topic_week WHERE topic_id = :topic_id";
+							$stmt = $db->prepare($sql);
+							
+							$stmt->bindParam("topic_id", $topic_id,PDO::PARAM_INT);									
+							$stmt->bindParam("topic_title", $topic_title,PDO::PARAM_STR);
+							$stmt->bindParam("topic_detail", $topic_detail,PDO::PARAM_STR);
+							$stmt->bindParam("topic_date", $topic_date,PDO::PARAM_STR);
+							$stmt->bindParam("topic_week", $topic_week,PDO::PARAM_INT);
+	
+							$stmt->execute();
+
+							$sql = "SELECT * FROM topics ORDER BY topic_id DESC LIMIT 1";
+      						$stmt = $db->prepare($sql);
+      						$stmt->execute();
+      						// fetchAll gets all elements in the array, while fetch just gets 1
+      						$topicData = $stmt->fetch(PDO::FETCH_OBJ);
+      						$topicData = json_encode($topicData);	
+		
+							$db = null;
+		
+							echo '{"topicData":' .$topicData.'}';
+						}
+						catch(PDOException $e) {
+							echo '{"error":{"text":'. $e->getMessage() .'}}';
+					}			
+				}
+				else
+				{
+					echo '{"error3":{"text":"Invalid detail."}}';
+				}
+			}	
+			else
+			{
+				echo '{"error2":{"text":"Invalid title."}}';
+			}
+		}
+		else
+		{
+			echo '{"error1":{"text":"Invalid week number."}}';
+		}
+	}		
+}
+
 
 function postNewTopicReply(){
 	$request = \Slim\Slim::getInstance()->request();
@@ -915,9 +1006,9 @@ function removeTopic(){
 
 function getPostedReply(){
 	$request = \Slim\Slim::getInstance()->request();
-  $data = json_decode($request->getBody());
-  $topic_id = $data->topic_id;
-  $parent_id = $data->parent_id;
+  	$data = json_decode($request->getBody());
+  	$topic_id = $data->topic_id;
+  	$parent_id = $data->parent_id;
 
 	try {
       $PostedReplyData = '';
@@ -966,28 +1057,6 @@ function getTopics(){
     }
 }
 
-/*function userTag(){
-	$request = \Slim\Slim::getInstance()->request();
-  $data = json_decode($request->getBody());
-  try {
-        $db = getDB();
-        $sql = "SELECT * FROM users WHERE user_id=:user_id";
-        $stmt = $db->prepare($sql);
-        $stmt->bindParam("user_id", $data, PDO::PARAM_INT);
-        $stmt->execute();
-        $userTag = $stmt->fetch(PDO::FETCH_OBJ);
-
-        $db = null;
-        if($userTag){
-				    echo '{"userTag": ' . json_encode($userTag) . '}';
-        else{
-				    echo '{"userTag": ""}';
-			  }
-
-  } catch(PDOException $e) {
-      echo '{"error":{"text":'. $e->getMessage() .'}}';
-  }
-}*/
 /*#######################END FORUM SYSTEM############################*/
 
 /*#######################SETTINGS############################*/

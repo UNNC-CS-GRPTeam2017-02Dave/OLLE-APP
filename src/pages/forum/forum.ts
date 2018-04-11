@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 import { Http } from '@angular/http';
-import { NavController, App } from 'ionic-angular';
+import { NavController,ModalController } from 'ionic-angular';
 import { GenericProvider } from '../../providers/generic/generic';
-import { ForumNewtopicPage} from '../forum-newtopic/forum-newtopic';
-import { ForumItemDetailPage} from '../forum-item-detail/forum-item-detail';
+import { NewtopicPage} from '../forum-newtopic-modal/forum-newtopic-modal';
+import { ForumTopicSettingsPage} from '../forum-topic-settings/forum-topic-settings';
+import { ItemDetailPage} from '../forum-item-detail/forum-item-detail';
 import 'rxjs/add/operator/map';
 
 @Component({
@@ -15,78 +16,106 @@ export class ForumPage {
 	items: any;
 	responseData:any;
 	userPostData = {"user_id":"", "token":""};
+	removeData = {"user_id":"", "token":"", "topic_id":""}
  	storage: any;
  	isAdmin: boolean = false;
  	isMaster: boolean = false;
+ 	index: number;
 
+	constructor(public http:Http, public navCtrl: NavController,private modalCtrl: ModalController, public GenericProvider: GenericProvider) { 
 
-	constructor(public http:Http, public navCtrl: NavController, public app:App, public GenericProvider: GenericProvider) {
-
-	}
-
-	ngOnInit(){
 		this.storage = JSON.parse(localStorage.getItem('userData')).userData;
-    	console.log(this.storage);
 
     	this.userPostData.user_id = this.storage.user_id;
-    	this.userPostData.token  = this.storage.token;
-
+    	this.userPostData.token  = this.storage.token;	
+		
+		this.getTopics();
+		this.getAdmin();  	
+	}
+	
+	getTopics(){
 		this.GenericProvider.getTopics().subscribe(response => {
 			this.responseData = response;
 			this.items = this.responseData.TopicsData;
-      console.log("Hello World");
 		});
-
-		this.getAdmin();
 	}
 
 	/*
 	initializeItems() {
-		this.items = this.responseData.TopicsData;
+		this.items = this.responseData.TopicsData;		
 	}
 	*/
 	viewItemDetail(item){
-
-		this.navCtrl.push(ForumItemDetailPage, {
+		
+		this.navCtrl.push(ItemDetailPage, {
 			item: item
-		});
+		});	
 	}
 
 	goToNewTopicPage(){
-		this.navCtrl.push(ForumNewtopicPage);
+		
+		let modal = this.modalCtrl.create(NewtopicPage);
+		modal.present();
+  	   
+  		modal.onDidDismiss(data => {
+  			
+  			if(data){
+  				this.items.unshift(data);
+  			}
+    	}); 	
 	}
 
 	getAdmin(){
 
-    this.GenericProvider.postData(this.userPostData, "isAdminUser").then((res) => {
-    	 this.responseData = res;
+    	this.GenericProvider.postData(this.userPostData, "isAdminUser").then((res) => {
+      		this.responseData = res;
 
-      	// isAdmin
-      	if( this.responseData.true ) {
-      		 this.isAdmin = true;
+      		// isAdmin
+      		if( this.responseData.true ) {
+       		 this.isAdmin = true;
 
-      	} else if ( this.responseData.isMaster ) {
-      		this.isMaster = true;
+      		} else if ( this.responseData.isMaster ) {
+        		this.isMaster = true;     
+      		}
 
-      	}
+    		}, (err) => {
+      			//error message
+    	});
+    }
 
-    }, (err) => {
+	removeTopic(item)
+	{	
+		this.removeData.user_id = this.storage.user_id;
+    	this.removeData.token  = this.storage.token;
+    	this.removeData.topic_id = item.topic_id;
 
-		});
-  }
-
-	removeTopic(item){
-		this.GenericProvider.postData(item.topic_id, "removeTopic").then((result) => {
-      		this.responseData = result;
-      		this.items.splice(this.items.indexOf(item), 1);
+		this.GenericProvider.postData(this.removeData, "removeTopic").then((result) => {
+      		this.responseData = result; 
+      		this.items.splice(this.items.indexOf(item), 1);   		   
     	}, (err) => {
       		//error message
-    	});
+    	});	
 	}
 
-	editTopic(item){
-		this.navCtrl.push(ForumNewtopicPage, {
+	editTopic(item)	
+	{
+		this.index = this.items.indexOf(item);
+		console.log(this.index);
+
+		let modal = this.modalCtrl.create(ForumTopicSettingsPage,{
 			item: item
 		});
+		modal.present();
+  	   
+  		modal.onDidDismiss(data => {
+  			
+  			if(data){
+  				console.log(data);
+  				this.items[this.index].topic_title = data.topic_title;
+  				this.items[this.index].topic_date = data.topic_date;
+  				this.items[this.index].topic_detail = data.topic_detail;
+  				this.items[this.index].topic_week = data.topic_week;
+  			}
+    	}); 
 	}
 }
