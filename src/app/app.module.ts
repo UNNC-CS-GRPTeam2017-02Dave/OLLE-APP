@@ -25,8 +25,8 @@ import { NgCalendarModule } from 'ionic2-calendar';
 import { ContentDrawer } from '../components/content-drawer/content-drawer';
 
 // TingTing
-import { ForumNewtopicPage } from '../pages/forum-newtopic/forum-newtopic';
-import { ForumItemDetailPage } from '../pages/forum-item-detail/forum-item-detail';
+import { NewtopicPage } from '../pages/forum-newtopic-modal/forum-newtopic-modal';
+import { ItemDetailPage } from '../pages/forum-item-detail/forum-item-detail';
 import { ForumReplyPage} from '../pages/forum-reply-modal/forum-reply-modal';
 import { ForumTopicSettingsPage} from '../pages/forum-topic-settings/forum-topic-settings';
 
@@ -48,9 +48,9 @@ import { ForumTopicSettingsPage} from '../pages/forum-topic-settings/forum-topic
     RegisterPage,
     TabsPage,
     ContentDrawer,
-    ForumNewtopicPage,
+    NewtopicPage,
     ForumReplyPage,
-    ForumItemDetailPage,
+    ItemDetailPage,
     ForumTopicSettingsPage
   ],
   imports: [
@@ -76,9 +76,9 @@ import { ForumTopicSettingsPage} from '../pages/forum-topic-settings/forum-topic
     ForumPage,
     RegisterPage,
     TabsPage,
-    ForumNewtopicPage,
+    NewtopicPage,
     ForumReplyPage,
-    ForumItemDetailPage,
+    ItemDetailPage,
     ForumTopicSettingsPage
   ],
   providers: [
