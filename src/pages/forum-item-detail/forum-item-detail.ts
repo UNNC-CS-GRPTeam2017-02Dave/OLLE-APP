@@ -40,7 +40,7 @@ export class ItemDetailPage {
 
   	getForumReply(){
 
-  		this.GenericProvider.postData(this.ReplyData, "getForumReply").then((result) => {
+  		this.GenericProvider.postData(this.item.topic_id, "getForumReply").then((result) => {
  
 	 		this.responseData = result;
 	 		this.items = this.responseData.ForumReplyData;
