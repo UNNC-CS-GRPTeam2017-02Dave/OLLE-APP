@@ -55,15 +55,17 @@ export class ItemDetailPage {
 		
     	let modal = this.modalCtrl.create(ForumReplyPage, {item:item});
   	   
-  		modal.onDidDismiss(data => {
-	  		this.GenericProvider.postData(this.ReplyData, "getForumReply").then((result) => {
- 
-	 			this.responseData = result;
-	 			this.items = this.responseData.ForumReplyData;
-	 			this.root_reply = this.items;
-    		}, (err) => {
-      		//error message 
-    		});
+  	modal.onDidDismiss(data => {
+  		if(data)
+  		{
+  			if(!data.parent_id){
+
+  				if(this.root_reply.length==0)
+  					this.getForumReply();
+  				else
+					this.root_reply.push(data);				
+  			}	
+  		}
     	}); 
 
     	modal.present();
