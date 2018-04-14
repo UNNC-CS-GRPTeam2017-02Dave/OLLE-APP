@@ -135,9 +135,15 @@ export class CalendarPage {
     let start = moment(event.startTime).format('LLLL');
     let end = moment(event.endTime).format('LLLL');
 
+    let alert = this.alertCtrl.create({
+      title:''+event.title,
+      subTitle:''+event.description +'<br><br>From:'+start+'<br>To:' + end,
+      buttons:['OK']
+    });
+
     if ( this.isAdmin || this.isMaster ) {
 
-      let alert = this.alertCtrl.create({
+      alert = this.alertCtrl.create({
       	title:''+event.title,
       	subTitle:''+event.description +'<br><br>From:'+start+'<br>To:' + end,
       	//buttons:['OK']
@@ -205,15 +211,6 @@ export class CalendarPage {
             }
         ]
       });
-
-    } else {
-      console.log("print");
-      let alert = this.alertCtrl.create({
-      	title:''+event.title,
-      	subTitle:''+event.description +'<br><br>From:'+start+'<br>To:' + end,
-      	buttons:['OK']
-      });
-
     }
     alert.present();
    }
