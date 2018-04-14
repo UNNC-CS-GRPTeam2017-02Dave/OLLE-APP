@@ -984,7 +984,7 @@ function removeTopic(){
 	$request = \Slim\Slim::getInstance()->request();
   $data = json_decode($request->getBody());
 
-	$topic_id=$data;
+	$topic_id=$data->topic_id;
 	try {
 				$db = getDB();
 				$sql="DELETE FROM topics WHERE topic_id=:topic_id";
