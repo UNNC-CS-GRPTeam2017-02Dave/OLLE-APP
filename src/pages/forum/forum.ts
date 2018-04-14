@@ -58,8 +58,11 @@ export class ForumPage {
 		modal.present();
   	   
   		modal.onDidDismiss(data => {
-  			
-  			if(data){
+  			if(this.items.length ==0){
+  					
+  				this.getTopics();
+  			}
+  			else{
   				this.items.unshift(data);
   			}
     	}); 	
