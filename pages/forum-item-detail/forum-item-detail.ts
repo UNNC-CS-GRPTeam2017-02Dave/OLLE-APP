@@ -1,11 +1,9 @@
 
 import { Component} from '@angular/core';
-import { IonicPage, ModalController, NavController, NavParams } from 'ionic-angular';
+import { ModalController, NavController, NavParams } from 'ionic-angular';
 import { ForumReplyPage} from '../forum-reply-modal/forum-reply-modal';
 import { GenericProvider } from '../../providers/generic/generic';
 
-
-@IonicPage()
 @Component({
   selector: 'page-forum-item-detail',
   templateUrl: 'forum-item-detail.html',
@@ -13,7 +11,7 @@ import { GenericProvider } from '../../providers/generic/generic';
 export class ItemDetailPage {
 
 	item: any;
-  	items: any;	
+  	items: any;
   	responseData: any;
   	storage: any;
   	item1: any;
@@ -23,11 +21,11 @@ export class ItemDetailPage {
   	ReplyData = {"user_id":"", "token":"", "topic_id":""};
 
   	constructor(public navCtrl: NavController, public navParams: NavParams, private modalCtrl: ModalController, public GenericProvider:GenericProvider) {
-	  
+
     	this.item = navParams.get('item');
 
     	this.storage = JSON.parse(localStorage.getItem('userData')).userData;
-  
+
     	this.PostedInfo.user_id = this.storage.user_id;
     	this.PostedInfo.token  = this.storage.token;
 
@@ -41,22 +39,20 @@ export class ItemDetailPage {
   	getForumReply(){
 
   		this.GenericProvider.postData(this.item.topic_id, "getForumReply").then((result) => {
- 
+
 	 		this.responseData = result;
 	 		this.items = this.responseData.ForumReplyData;
 	 		this.root_reply = this.items;
-	 		
+
     	}, (err) => {
-      		//error message 
+      		//error message
     	});
   	}
- 
+
   	goToNewReply(item){
-		
-    	let modal = this.modalCtrl.create(ForumReplyPage, {item:item});
-  	   
+
   		let modal = this.modalCtrl.create(ForumReplyPage, {item:item});
-       
+
       modal.onDidDismiss(data => {
         if(data)
         {
@@ -65,14 +61,14 @@ export class ItemDetailPage {
             if(this.root_reply.length==0)
               this.getForumReply();
             else
-            this.root_reply.push(data);       
-          } 
+            this.root_reply.push(data);
+          }
         }
-      }); 
+      });
 
     	modal.present();
   	}
-  
+
   	initializeItems() {
     	this.items = this.root_reply;
   	}
@@ -83,38 +79,38 @@ export class ItemDetailPage {
   		this.PostedInfo.parent_id = parent.post_id;
 
   		this.GenericProvider.postData(this.PostedInfo, "getPostedReply").then((result) => {
-	 		this.responseData = result;	 		 		
+	 		this.responseData = result;
 	 		this.posted_reply = this.responseData.PostedReplyData;
     	}, (err) => {
-      		//error message 
+      		//error message
     	});
   	}
 
-  	
-    view_comments(child, parent){	
-						
+
+    view_comments(child, parent){
+
 		if(child.parent_id == parent.post_id)
 			return true;
 		else
 			return false;
 	}
 
-	
+
   	getItems(ev: any) {
     	// Reset items back to all of the items
     	this.initializeItems();
     	// set val to the value of the searchbar
     	let val = ev.target.value;
-       
+
   		if(this.items) {
 
   			if (val && val.trim() != '') {
-      
+
       			this.items = this.items.filter((item) => {
         			return (item.language.toLowerCase().indexOf(val.toLowerCase()) > -1);
-      			})  
+      			})
     		}
-  		}    	
+  		}
   	}
 
   	isReplyEmpty(){
@@ -125,5 +121,5 @@ export class ItemDetailPage {
   		else{
   			return false;
   		}
-  	} 
+  	}
 }
