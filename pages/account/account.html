@@ -1,0 +1,71 @@
+<ion-header>
+  <ion-navbar color="primary">
+    
+    <ion-title>OLLE-APP</ion-title>
+
+    <!--Logout Button -->
+    <ion-buttons end>
+      <button  ion-button  (click)="logout()">
+        <ion-icon id="logout" name="md-log-out"></ion-icon>
+      </button>
+    </ion-buttons>
+
+  </ion-navbar>
+</ion-header>
+
+
+<ion-content>
+   <div text-center>
+    <h2>Account Management</h2>
+  </div>
+  <ion-list>
+
+      <div id="block">
+        <ion-icon class="person" name="person" item-start></ion-icon>
+       <!--  <div class="elem"> -->
+          <button  block (click)="changeName()">
+          <div class="left_thing">
+            Name:
+          </div>
+          <div class="right_thing">
+            {{ userDetails.name }}
+          </div>
+        </button>
+       <!--  </div> -->
+       <!--  <div class="txt"></div> -->
+      </div>
+
+
+      <div id="block">
+          <ion-icon class="person" name="person" item-start></ion-icon>
+          <button block (click)="changeSurname()">
+          <div class="left_thing">
+            Surname:
+          </div>
+          <div class="right_thing">
+            {{ userDetails.surname }}
+          </div>
+          </button>
+      </div>
+
+      <div id="block">
+          <ion-icon class="person" name="person" item-start></ion-icon>
+          <button  (click)="changeUsername()">
+            <div class="left_thing">
+           Username:
+          </div>
+          <div class="right_thing">
+            {{ userDetails.username }}
+          </div>
+      </button>
+      </div>
+
+    <button ion-button  block  id="press"  (click)="changePassword()">
+      <div  >Change Password</div>
+    </button>
+
+  </ion-list>
+
+  
+
+</ion-content>

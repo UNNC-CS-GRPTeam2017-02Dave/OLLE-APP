@@ -1,0 +1,54 @@
+
+<div id="custom-overlay" [style.display]="splash ? 'flex': 'none'">
+  <div class="flb">
+    <div class="Aligner-item Aligner-item--top"></div>
+    <h1 id="title">OLLE-APP</h1>
+    <img src="assets/OLLE.jpg">
+    <div class="Aligner-item Aligner-item--bottom"></div>
+  </div>
+</div>
+
+<div >
+<ion-header>
+  <ion-navbar color="primary">
+    <ion-title >OLLE-APP</ion-title>
+  </ion-navbar>
+</ion-header>
+</div>
+
+<!-- <ion-header>
+     <ion-toolbar>
+      <ion-title >OLLE-APP</ion-title>
+    </ion-toolbar>
+</ion-header> -->
+
+  <!-- <span class="login100-form-avatar">
+            <img src="/assets/avatar-01.jpg" alt="AVATAR">
+    </span> -->
+    
+
+<ion-content id="login_content">
+  <ion-avatar class ="login100-form-avatar" item-start>
+      <img src="/assets/VAV.jpg">
+    </ion-avatar>
+  <ion-item> 
+    <ion-label floating>
+      Username/Email
+    </ion-label>
+    <ion-input class="userName" type="text" value="" [(ngModel)]="userData.username" clearInput></ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-label floating>
+      Password
+    </ion-label>
+    <ion-input class="password" type="password" value="" [(ngModel)]="userData.password" clearInput></ion-input>
+  </ion-item>
+
+ <div class="login_container">
+  <button class="login" ion-button round block color="positive" (click)="login()">Login</button>
+ </div>
+ <div class="login_container">
+  <button class="login" ion-button round block  color="positive" (click)="navToSignupPage()">Sign up</button>
+   </div>
+</ion-content>

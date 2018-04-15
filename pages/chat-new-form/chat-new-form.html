@@ -1,0 +1,36 @@
+<ion-header>
+  
+
+  <ion-navbar color="primary">
+     <ion-buttons start left>
+        <button ion-button  (click)="back()">
+          <ion-icon id="back" name="arrow-round-back"></ion-icon>
+        </button>
+      </ion-buttons>
+     
+        
+      
+      <ion-title>New Chat Form</ion-title>
+    
+  </ion-navbar>
+</ion-header>
+
+<ion-content>
+  <ion-item>
+    <ion-label color="primary" stacked>Language</ion-label>
+    <ion-input [(ngModel)]="chatPostData.language"></ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-label color="primary" stacked>Topic</ion-label>
+    <ion-input [(ngModel)]="chatPostData.topic"></ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-label color="primary" stacked>Description</ion-label>
+    <ion-textarea  [(ngModel)]="chatPostData.description"></ion-textarea>
+  </ion-item>
+
+  <button ion-button round block color="primary" (click)="create()">Create</button>
+
+</ion-content>

@@ -1,0 +1,48 @@
+<ion-header>
+  <ion-navbar color="primary"> 
+    <ion-buttons start left>   
+        <button ion-button (click)="back()">
+          <ion-icon id="back" name="arrow-round-back"></ion-icon>
+        </button> 
+    </ion-buttons>
+      <ion-title>Event Details</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+<!-- <ion-item>
+    <ion-label color="primary" stacked>Old Password</ion-label>
+    <ion-input type="password"  clearInput [(ngModel)]="userDetails.oldPass"></ion-input>
+  </ion-item> -->
+
+<ion-content>
+   <ion-item>
+    <ion-label color="primary" stacked>Title</ion-label>
+    <ion-input type="text" [(ngModel)]="event.title"></ion-input>
+    </ion-item>
+
+	   <ion-item>
+      <ion-label color="primary" stacked>Description</ion-label>
+      <ion-textarea type="text" [(ngModel)]="event.description"></ion-textarea>
+    </ion-item>
+
+    <ion-item>
+
+      <ion-label color="primary" stacked>Start</ion-label>
+      <ion-datetime displayFormat="MM/DD/YYYY HH:mm" pickerFormat="MM/DD/YYYY HH:mm" [(ngModel)]="event.startTime" [min]="minDate"></ion-datetime>
+    </ion-item>
+
+    <ion-item>
+      <ion-label color="primary" stacked>End</ion-label>
+      <ion-datetime displayFormat="MM/DD/YYYY HH:mm" pickerFormat="MM/DD/YYYY HH:mm" [(ngModel)]="event.endTime" [min]="minDate"></ion-datetime>
+    </ion-item>
+
+  <!--  <ion-item>
+      <ion-label>All Day?</ion-label>
+      <ion-checkbox [(ngModel)]="event.allDay"></ion-checkbox>
+    </ion-item>-->
+
+  <button ion-button full icon-left (click)="save()">
+    <ion-icon name="checkmark"></ion-icon>{{string}}
+   </button>
+</ion-content>
