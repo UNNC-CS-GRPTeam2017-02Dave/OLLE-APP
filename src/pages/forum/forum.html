@@ -1,0 +1,38 @@
+<ion-header >
+  <ion-navbar color="primary">
+    <ion-title>OLLE-APP</ion-title>
+  </ion-navbar>
+
+  <!-- can add a search bar here-->
+</ion-header>
+
+<ion-content>
+  <div text-center>
+    <h2>Topics List</h2>
+  </div>
+    <div text-right *ngIf="isAdmin || isMaster">
+      <button ion-button (click)="goToNewTopicPage()" icon-left>
+        <ion-icon name="md-add-circle">
+        </ion-icon>     New Topic
+      </button>
+    </div>
+  <ion-list>
+    <ion-item-sliding *ngFor="let item of items">
+    <ion-item ion-itemx id="topic">
+      <h1>Week{{item.topic_week}}</h1>
+       <br><p>{{item.topic_title}}</p>
+
+      <div id="dateTopic"><p>Deadline: {{item.topic_date}}</p></div>
+      <div id="viewbtn">
+        <button ion-button aling="right" (click)="viewItemDetail(item)">View</button>
+      </div>
+    </ion-item>
+    <ion-item-options *ngIf="isAdmin || isMaster" id="sliding">
+      <button ion-button color="primary" id="sliding_button"  (click)="editTopic(item)"><ion-icon name="clipboard"></ion-icon>Edit</button>
+      <button ion-button color="danger" id="sliding_button" (click)="removeTopic(item)"><ion-icon name="trash"></ion-icon>Delete</button>
+    </ion-item-options>
+    </ion-item-sliding>
+  </ion-list>
+
+
+</ion-content>

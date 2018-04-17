@@ -1,0 +1,46 @@
+<ion-header>
+  <ion-navbar color="primary">
+    <ion-buttons start left>
+        <button ion-button (click)="back()">
+          <ion-icon id="back" name="arrow-round-back"></ion-icon>
+        </button>  
+    </ion-buttons> 
+    <ion-title>New topic</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content text-center padding>
+  <ion-list>
+    <div id="new-topìc">
+		<ion-item>
+		<ion-label color="primary" stacked>Week</ion-label>
+		<!--miss ngModel here-->
+        <ion-input type="number" min="1" required="required" [(ngModel)]="topicData.topic_week"></ion-input>
+      </ion-item>
+		
+		
+      <ion-item>
+		<ion-label color="primary" stacked>Topic Title</ion-label>
+		<!--miss ngModel here-->
+        <ion-input type="text" required="required" [(ngModel)]="topicData.topic_title" ></ion-input>
+      </ion-item>
+
+      <ion-item>
+		<ion-label color="primary" stacked>Topic Detail</ion-label>
+		<!--miss ngModel here-->
+        <ion-input type="text" required="required" [(ngModel)]="topicData.topic_detail"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label color="primary" stacked>Deadline</ion-label>
+		<!--miss ngModel here-->
+        <ion-datetime displayFormat="YYYY-MM-DD" pickerFormat="YYYY MM DD" [(ngModel)]="topicData.topic_date"></ion-datetime>
+      </ion-item>
+
+      <button ion-button block (click)="postNewTopic()">ADD NEW</button>
+    </div>
+  </ion-list>
+
+
+
+</ion-content>

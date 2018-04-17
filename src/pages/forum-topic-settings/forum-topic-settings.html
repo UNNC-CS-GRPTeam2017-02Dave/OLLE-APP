@@ -1,0 +1,48 @@
+
+<ion-header>
+  <ion-navbar color="primary">
+    <ion-buttons start left>
+        <button ion-button (click)="back()">
+          <ion-icon id="back" name="arrow-round-back"></ion-icon>
+        </button>
+    </ion-buttons>
+      <ion-title>Edit Topic</ion-title>
+      <ion-buttons end>
+      <button  ion-button  (click)="modify()"> Save</button>
+      </ion-buttons>
+  </ion-navbar>
+
+</ion-header>
+
+
+
+<ion-content text-center padding>
+  <ion-list>
+    <div id="topic-settings">
+		<ion-item>
+		<ion-label stacked color="primary">Week</ion-label>
+		<!--miss ngModel here-->
+        <ion-input type="number" min="1" [(ngModel)]="dataPost.topic_week">{{topicData.topic_week}}</ion-input>
+      </ion-item>
+		
+		
+      <ion-item>
+		<ion-label stacked color="primary">Topic Title</ion-label>
+        	<ion-input type="text" [(ngModel)]="dataPost.topic_title" >{{topicData.topic_title}}</ion-input>
+      </ion-item>
+
+      <ion-item>
+		<ion-label stacked color="primary">Topic Detail</ion-label>
+        	<ion-input type="text"  [(ngModel)]="dataPost.topic_detail">{{topicData.topic_detail}}</ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label stacked color="primary">Deadline</ion-label>
+		<!--miss ngModel here-->
+        <ion-datetime displayFormat="YYYY-MM-DD" pickerFormat="YYYY MM DD" 
+        									[(ngModel)]="dataPost.topic_date"></ion-datetime>
+      </ion-item>
+    </div>
+  </ion-list>
+
+</ion-content>

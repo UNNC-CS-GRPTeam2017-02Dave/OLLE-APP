@@ -1,0 +1,37 @@
+<ion-header>
+  <ion-navbar color="primary">
+    <ion-title>OLLE-APP</ion-title>
+    <ion-buttons *ngIf="isAdmin || isMaster"end end>
+    	<button ion-button  (click)="addEvent()">
+    		<ion-icon  id="add" name="add-circle"></ion-icon>
+    	</button>
+    </ion-buttons>
+  </ion-navbar>
+</ion-header>
+
+
+
+
+<ion-content>
+<div text-center> 
+  <h2>
+    {{ viewTitle }}
+  </h2>
+</div>
+	<!-- array of events in the calendar -->
+	<!-- passes the event selected to function -->
+	<calendar
+	[eventSource]="eventSource"
+	[calendarMode]="calendar.mode"
+	[currentDate]="calendar.currentDate"
+	(onEventSelected)="onEventSelected($event)"
+	(onTitleChanged)="onViewTitleChanged($event)"
+	(onTimeSelected)="onTimeSelected($event)"
+	step="30"
+	class="calendar">
+	</calendar>
+
+  <ion-fab right bottom *ngIf="isMaster">
+    <button ion-fab color="primary" (click)="removeOld()"><ion-icon name="remove"></ion-icon></button>
+  </ion-fab>
+</ion-content>

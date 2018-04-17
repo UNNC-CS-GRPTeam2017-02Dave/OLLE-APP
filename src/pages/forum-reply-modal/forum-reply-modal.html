@@ -1,0 +1,25 @@
+<ion-header>
+  <ion-navbar color="primary">
+    <ion-buttons start left>
+        <button ion-button (click)="back()">
+          <ion-icon id="back" name="arrow-round-back"></ion-icon>
+        </button>
+    </ion-buttons>
+      <ion-title>Reply</ion-title>
+  </ion-navbar>
+</ion-header>
+
+
+
+
+
+<ion-content>
+<ion-list>
+  <ion-item id="reply">
+  <ion-label color="primary" stacked>Reply here</ion-label>
+    <ion-textarea  type="text" [(ngModel)]="postTopicReply.user_post"></ion-textarea>
+  </ion-item>
+
+</ion-list>
+	<button ion-button round block (click)="postNewTopicReply()">Submit</button>
+</ion-content>
