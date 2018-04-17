@@ -84,7 +84,7 @@ export class RegisterPage {
     this.startTimer()
     let prompt = this.alertCtrl.create({
       title: message1,
-      message: message2 + ' ( ${this.timer} )',
+      message: message2,//' ( ${this.timer} )',
       inputs: [
         {
           name: 'valCode',
