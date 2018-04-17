@@ -1,20 +1,13 @@
 
 <ion-header>
-  <ion-navbar color="primary">
-    <ion-buttons start left>
-        <button ion-button (click)="back()">
-          <ion-icon id="back" name="arrow-round-back"></ion-icon>
+  <ion-navbar>
+    <div ion-row>
+        <button ion-button icon-start clear color="dark" (click)="back()">
+          <ion-icon name="arrow-round-back"></ion-icon>
         </button>
-    </ion-buttons>
-      <ion-title>Edit Topic</ion-title>
-      <ion-buttons end>
-      <button  ion-button  (click)="modify()"> Save</button>
-      </ion-buttons>
+    </div>
   </ion-navbar>
-
 </ion-header>
-
-
 
 <ion-content text-center padding>
   <ion-list>
@@ -42,6 +35,7 @@
         <ion-datetime displayFormat="YYYY-MM-DD" pickerFormat="YYYY MM DD" 
         									[(ngModel)]="dataPost.topic_date"></ion-datetime>
       </ion-item>
+	<button  ion-button block  (click)="modify()"> Save</button>
     </div>
   </ion-list>
 
